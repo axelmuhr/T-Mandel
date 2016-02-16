@@ -1,0 +1,56 @@
+;******************************** SRESET.TAL ********************************
+;  (C) Copyright 1987-1993  Computer System Architects, Provo UT.           *
+;  This  program is the property of Computer System Architects (CSA)        *
+;  and is provided only as an example of a transputer/PC program for        *
+;  use  with CSA's Transputer Education Kit and other transputer products.  *
+;  You may freely distribute copies or modifiy the program as a whole or in *
+;  part, provided you insert in each copy appropriate copyright notices and *
+;  disclaimer of warranty and send to CSA a copy of any modifications which *
+;  you plan to distribute.						    *
+;  This program is provided as is without warranty of any kind. CSA is not  *
+;  responsible for any damages arising out of the use of this program.      *
+;***************************************************************************/
+;****************************************************************************
+; This program initializes the transputer and then resets any transputers
+; attached to it's subsystem. The three bytes at the end are an opcode that
+; does a software reset of the transputer
+;****************************************************************************
+	.all
+
+	.set    RESERVE,5
+	.set    INITIME,0
+	.set    RSTHOLD,512
+	.set    SSBASE,0
+	.set    RESET,0
+	.set    ANALYSE,1
+        .set    ASSERT,1
+        .set    DEASSERT,0
+
+        .pub    START
+START:  ajw     RESERVE                 ;reserve work space
+        mint                            ;init low pri process queue
+        stlf
+        mint                            ;init hi pri process queue
+        sthf
+        mint                            ;init low pri timer queue
+        mint
+        stnl    10
+        ldc     INITIME                 ;start timer
+        sttimer
+        ldc     DEASSERT                ;deassert sub sys reset
+        ldc     SSBASE
+        stnl    RESET
+        ldc     DEASSERT                ;deassert sub sys analyse
+        ldc     SSBASE
+        stnl    ANALYSE
+        ldc     ASSERT                  ;assert sub sys reset
+        ldc     SSBASE
+        stnl    RESET
+        ldtimer                         ;wait min. 8 cycles of ClockIn
+        adc     RSTHOLD
+        tin
+        ldc     DEASSERT                ;deassert sub sys reset
+        ldc     SSBASE
+        stnl    RESET
+        .db     0x21,0x2f,0xff          ;reset transputer
+        .end

@@ -1,0 +1,2175 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     TCHRT
+
+
+
+                     Turbo C High Resolution Timer Toolbox 
+
+
+
+                                  Version 3.00
+
+
+
+                          Shareware Evaluation Version
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  Ryle Design
+
+                                  P.O. Box 22
+
+                          Mt. Pleasant, Michigan 48804
+
+                                (517) 773-0587
+
+                               Cserv 73047,1765
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 Contents
+
+
+
+          TCHRT User Guide                                           1
+             Introduction  . . . . . . . . . . . . . . . . . . . . . 1
+             Functional Overview . . . . . . . . . . . . . . . . . . 2
+             Theory  . . . . . . . . . . . . . . . . . . . . . . . . 3
+             TCHRT Function Descriptions . . . . . . . . . . . . . . 4
+             Examples  . . . . . . . . . . . . . . . . . . . . . . . 8
+             Technical Support . . . . . . . . . . . . . . . . . . . 8
+             Shareware . . . . . . . . . . . . . . . . . . . . . . . 8
+
+          TCHRT Function Reference                                  11
+             t_ask_delay . . . . . . . . . . . . . . . . . . . . .  11
+             t_ask_timer . . . . . . . . . . . . . . . . . . . . .  11
+             t_bios_ask  . . . . . . . . . . . . . . . . . . . . .  12
+             t_bios_entry  . . . . . . . . . . . . . . . . . . . .  12
+             t_bios_exit . . . . . . . . . . . . . . . . . . . . .  13
+             t_bios_fname  . . . . . . . . . . . . . . . . . . . .  13
+             t_bios_load_desc  . . . . . . . . . . . . . . . . . .  13
+             t_bios_report . . . . . . . . . . . . . . . . . . . .  14
+             t_bios_resume . . . . . . . . . . . . . . . . . . . .  14
+             t_bios_reset  . . . . . . . . . . . . . . . . . . . .  14
+             t_bios_rname  . . . . . . . . . . . . . . . . . . . .  15
+             t_bios_set_file . . . . . . . . . . . . . . . . . . .  15
+             t_bios_set_user . . . . . . . . . . . . . . . . . . .  15
+             t_bios_start  . . . . . . . . . . . . . . . . . . . .  16
+             t_bios_stop . . . . . . . . . . . . . . . . . . . . .  17
+             t_bios_suspend  . . . . . . . . . . . . . . . . . . .  18
+             t_calc_delay_ff . . . . . . . . . . . . . . . . . . .  18
+             t_calib . . . . . . . . . . . . . . . . . . . . . . .  18
+             t_cvt_time  . . . . . . . . . . . . . . . . . . . . .  19
+             t_delay_calib . . . . . . . . . . . . . . . . . . . .  19
+             t_diff  . . . . . . . . . . . . . . . . . . . . . . .  19
+             t_do_delay  . . . . . . . . . . . . . . . . . . . . .  20
+             t_do_delay_wints  . . . . . . . . . . . . . . . . . .  20
+             t_entry . . . . . . . . . . . . . . . . . . . . . . .  21
+             t_exit  . . . . . . . . . . . . . . . . . . . . . . .  21
+             t_fname . . . . . . . . . . . . . . . . . . . . . . .  21
+             t_get . . . . . . . . . . . . . . . . . . . . . . . .  22
+             t_get_delay_ff  . . . . . . . . . . . . . . . . . . .  22
+             t_hires_entry . . . . . . . . . . . . . . . . . . . .  23
+             t_hires_exit  . . . . . . . . . . . . . . . . . . . .  23
+             t_hook_int  . . . . . . . . . . . . . . . . . . . . .  23
+             t_min_delay . . . . . . . . . . . . . . . . . . . . .  24
+             t_name  . . . . . . . . . . . . . . . . . . . . . . .  24
+             t_report  . . . . . . . . . . . . . . . . . . . . . .  24
+             t_request . . . . . . . . . . . . . . . . . . . . . .  25
+             t_res_delay . . . . . . . . . . . . . . . . . . . . .  25
+             t_reset . . . . . . . . . . . . . . . . . . . . . . .  25
+
+
+
+                                       i
+
+
+
+
+
+             t_resume  . . . . . . . . . . . . . . . . . . . . . .  26
+             t_rname . . . . . . . . . . . . . . . . . . . . . . .  26
+             t_set_delay_ff  . . . . . . . . . . . . . . . . . . .  26
+             t_setmode . . . . . . . . . . . . . . . . . . . . . .  27
+             t_start . . . . . . . . . . . . . . . . . . . . . . .  27
+             t_stop  . . . . . . . . . . . . . . . . . . . . . . .  28
+             t_suspend . . . . . . . . . . . . . . . . . . . . . .  28
+             t_unhook_int  . . . . . . . . . . . . . . . . . . . .  28
+
+          TCHRT V3.00 Registration . . . . . . . . . . . . . . . .  30
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                       ii
+
+
+
+
+
+
+
+
+
+
+
+                                TCHRT User Guide
+
+
+     Introduction
+
+
+     TCHRT  (Turbo  C  High  Resolution  Timer) is a software library  that
+     provides the software developer with  reliable  timing  functions that
+     work across  the entire Intel 80xxx PC compatible hardware environment
+     with microsecond resolution. The TCHRT timing logic  calibrates itself
+     to the host PC clock rate and processor environment at run-time,  so a
+     single executable program will yield  accurate  results  regardless of
+     the host microprocessor and clock speed.
+
+     TCHRT  is  the  definitive choice for any PC application that requires
+     precision timing.  Some typical TCHRT applications are:
+
+     Source Code Timer/Profiler
+     By  adding timer calls to source code  under  development,  TCHRT  can
+     generate a detailed summary  of  execution  time by program subroutine
+     and immediately  illustrate  the  software's  "hot  spots"  that might
+     benefit from further code or algorithm optimization.  Unlike "binning"
+     profilers  that display the number of "hits" in  a  range  of  program
+     addresses, TCHRT provides  a  direct one to one correspondence between
+     source code and elapsed time with user defined granularity.
+
+     Hardware Performance Evaluator
+     The high resolution and  self  calibration  features  of TCHRT make it
+     ideal  for  insertion  in code to evaluate hardware performance.  Disk
+     drives,  numeric processors and CRT controllers  can  all  have  their
+     throughput measured very  accurately  with  TCHRT,  and  with numerous
+     timers  at  the  users   disposal,   many   device  functions  may  be
+     independently  measured  in  a single run.  The formatted timer report
+     generated  by  TCHRT  makes  compilation  and  interpretation  of test
+     results painless.
+
+     Process Control
+     With TCHRT, process control applications that require  precise timings
+     or  precision  delays  are  easy  to  implement.    No longer will the
+     application developer have to make an educated guess as to how  long a
+     critical interrupt is taking to service an I/O port as TCHRT  can time
+     virtually any hardware or software interrupt and provide the developer
+     with  precise  accurate  timings  of  the  critical  procedure.    The
+     precision delay  functions  allow  the  programmer  to  implement data
+     acquisition loops with microsecond resolution.
+
+     Timing and Scoring
+     TCHRT  is the perfect "timer engine" to build  a  timing  and  scoring
+     system for use in nearly any competitive event.  With  its microsecond
+     resolution and self calibration features, TCHRT surpasses conventional
+     sports   timing  equipment  resolution  and  allows  the   application
+
+
+
+
+
+
+
+
+
+     developer to  package  high  resolution  timing  and  complete scoring
+     functionality in a single package.
+
+     Library Source Code Included
+     Since the source code  to  the  TCHRT  linkable libraries is included,
+     users needing  a particular timing function not implemented can modify
+     the TCHRT functions to suit their particular requirements.
+
+
+     Functional Overview
+
+
+     The  functionality  of  TCHRT  can  be divided into  several  distinct
+     categories of timer services:
+
+     TCHRT Timer Logic
+     These functions initialize  the  TCHRT  timing  system,  calibrate the
+     timing logic, provide a low level interface to the PC timing hardware,
+     and perform miscellaneous timing functions that  are  generally hidden
+     from  the  user.  Some of these functions will be of interest to users
+     who  need to design their own timer functions and want to build on the
+     TCHRT low level timer logic.
+
+     Generic Timer Functions
+     These  functions allow the user to  control  arbitrary  event  timers.
+     Functions exist to start, stop,  suspend,  resume,  name,  get elapsed
+     time  and activation counts, and to  generate  detailed  reports  that
+     summarize  all  timer  activity.  Timer  reports may be output to  the
+     display, a disk  file,  or  to  the printer. A setmode function allows
+     users to run timers  with  interrupts enabled or disabled.  The number
+     of timers active concurrently is restricted  only by available memory.
+
+     BIOS Interrupt Timer Functions
+     These  functions  are  similar  to  the Generic Timer  Functions,  but
+     operate only on BIOS  interrupts.   Using these functions the user may
+     install  timer   logic  in  any  PC  interrupt  vector,  and  complete
+     information on  that interrupt's activity can be generated.  Interrupt
+     timer  reports  list  interrupt  activity  broken  down  by  interrupt
+     function (contents of the AH register when the  interrupt  is invoked)
+     and text  files  containing  interrupt  function  descriptions  may be
+     loaded to describe each  interrupt  function  timer  in the BIOS timer
+     report.    Interrupt  description  files  are  provided  for important
+     software interrupts in the PC/MSDOS environment.   Multiple interrupts
+     may be timed concurrently.
+
+     Precision Delay Functions
+     These functions allow the user  to  generate  delays  with microsecond
+     accuracy. Functions exist to  generate  delays,  query the delay logic
+     for available  delay resolution and minimum delay time possible (these
+     are hardware dependent), and to  "fine tune" the delay calibration for
+     one or more specific delay lengths.
+
+
+
+
+
+
+
+
+
+                                    TCHRT  2
+
+
+
+
+
+     Theory
+
+
+     TCHRT works by directly  interfacing  with channel 0 of the 8253 timer
+     chip found in all compatible PCs.  Channel 0 counts  from  65535 to 0,
+     when  it  triggers  BIOS  interrupt  8 and begins counting from  65535
+     again.  Interrupt 8 is the hardware timer interrupt, and it increments
+     the DOS time  of  day  data  word  in  the  BIOS data area, checks for
+     diskette motor activity  and  shuts  down  the  motor  if  needed, and
+     finally calls BIOS interrupt 1C (hex), which is known as  the software
+     timer tick.  At boot time, 1C contains an  IRET  instruction,  meaning
+     there is no routine installed in  that  vector.   Since the 8253 has a
+     period of 838 nanoseconds, the hardware timer tick occurs every 54.925
+     milliseconds, or 18.2 times a second, which is  the  standard software
+     time resolution of the PC.   The  8253  count can be read by accessing
+     the appropriate IO port, and by reading the 8253 count along  with the
+     low word DOS time of day count, we  can  construct  a  high resolution
+     time stamp, which  is  the  base  unit  of  time  for TCHRT.  The only
+     modifications we make to the PC  environment  is to change the mode of
+     channel 0 to give the output count a 50 percent duty cycle, which does
+     not  impact  any  other  PC  operations.    Thus  we  have  a  simple,
+     unobtrusive,  highly  accurate  time  reference  with  838  nanosecond
+     resolution.    Once  a highly accurate time reference is available, we
+     can use it to calibrate a  simple  function that contains an inner and
+     outer loop to generate precision delays.
+
+     The accuracy of TCHRT is as  accurate  as  the 8253 timer chip and the
+     ability of the software to measure the overhead in retrieving the 8253
+     and DOS time of day data.  With the advent of  advanced  chips  in the
+     80286 and 80386 class, the  effects  of  instruction  prefetch queues,
+     pipelining, and  cache memory become significant and the same sequence
+     of  instructions  may  take  different  amounts  of  time  to  execute
+     depending   on   the   interaction   of  the  processor's  performance
+     optimization  mechanisms.    The  end  result  is  twofold:    TCHRT's
+     calibration  routines may experience inaccuracies, and software  under
+     test  may  give  different timing results on different runs.  Normally
+     the "jitter" introduced by these conditions  is  on the order of a few
+     microseconds.
+
+     A  major  source  of  apparent  erratic timer behavior comes from  the
+     interaction of asynchronous software and hardware interrupts  that may
+     occur  during a timed interval.  While  the  PC/MSDOS  environment  is
+     essentially single-threaded,  there  is  enough  "background" activity
+     occurring  in the form of timer and  keyboard  interrupts  that  these
+     interrupts  may occur during an timed interval,  and  the  time  these
+     interrupts  take  to  complete  are  naturally  counted  in the  timed
+     interval.   For very short duration timing a  TCHRT  timer  mode  with
+     interrupts disabled is available,  but  that  may  not be suitable for
+     longer  duration  timings,  or  when  concurrent  timer   activity  is
+     required.  Be aware that few results in  the  PC  environment  will be
+     exactly  repeatable,  and  that some variance in the timing results is
+     unavoidable.
+
+     The high resolution  delay  function of TCHRT is particularly affected
+     by  background  interrupts  and  processor   performance  optimization
+     mechanisms.    The  initial delay calibration will yield delays with a
+     variance of from one to three percent of the requested delay interval.
+
+
+
+                                    TCHRT  3
+
+
+
+
+
+     Additional functions are available to optimize  the  delay calibration
+     to a specific delay interval, and using these functions can reduce the
+     delay  error  to  between  zero  and  one  percent,  and thus they are
+     recommended for critical applications.
+
+
+     TCHRT Function Descriptions
+
+
+     The following is  a  brief  synopsis  of the functions found in TCHRT.
+     This chapter is meant to give  the  user  a brief overview, and is not
+     meant to be a definitive reference.  It  is  essential  that  the user
+     review the  complete  function  reference  in  the  Function Reference
+     chapter before using any TCHRT function.  Some functions may  not work
+     as they would appear at first inspection, and in order to achieve high
+     performance, TCHRT has a minimum of internal error checking to prevent
+     such catastrophes as NULL pointer references.
+
+     TCHRT Timer Logic
+
+     Initialization functions
+
+     t_request           Requests the number of timers needed.
+     t_start             Initializes the TCHRT timer logic.
+     t_stop              Shuts down TCHRT and frees allocated memory.
+
+     Internal functions
+
+     t_get               Gets TCHRT time stamp with interrupts
+                         enabled.
+     t_hires_entry       Gets TCHRT time stamp with interrupts
+                         disabled.  8253 count is reset.
+     t_hires_exit        Gets TCHRT time stamp and restores interrupts
+     t_diff              Calculates elapsed time difference between
+                         two TCHRT time stamps.
+     t_calib             Calibrates TCHRT timer logic, resets all
+                         timers, and calls the delay calibration
+                         function.
+     t_bios_entry        Receives timer start request from interrupt
+                         service routine.
+     t_bios_exit         Receives timer stop request from interrupt
+                         service routine.
+     t_bios_load_desc    Loads interrupt function description file
+     t_hook_int          Installs timer calls in specified interrupt
+                         vector.
+     t_unhook_int        Removes timer calls from specified interrupt
+                         vector.
+     t_delay_calib       Calibrates delay logic.
+
+     t_request is called by the user to specify the number of timers needed
+     for generic timer  operations  if  the  user  wishes  to  override the
+     default  number  of  timers provided (10).    Since  each  timer  data
+     structure is  allocated dynamically, the number of timers available is
+     restricted by the amount of heap available and the constraints  of the
+     memory model you are using. If  t_request  is used in your program, it
+     must be called before t_start.
+
+
+
+
+                                    TCHRT  4
+
+
+
+
+
+     t_start allocates the appropriate  amount  of  heap  for the number of
+     timers requested, initializes those  timers,  and  calibrates  the low
+     level timer routines.   t_start  must always be invoked prior to using
+     any other timer functions with the exception of t_request.
+
+     t_stop deallocates all allocated heap  associated  with  generic timer
+     activity and shuts down the timer logic.  t_stop must be  called prior
+     to program termination, and  no  further calls to TCHRT should be made
+     unless t_start is invoked first.
+
+     The TCHRT internal functions of primary interest to the programmer are
+     t_get, which is the interface to  the  8253 timer chip;  t_diff, which
+     calculates  the  elapsed  time  between  two  TCHRT  time stamps;  and
+     t_calib, which calibrates the  timer  and delay logic to the host run-
+     time environment.
+
+     Generic TCHRT Timer Functions
+
+     This class of functions implement general purpose timer functionality.
+
+     t_entry             Starts the specified timer.
+     t_exit              Stops the specified timer.
+     t_suspend           Suspends the specified timer.
+     t_resume            Resumes the specified suspended timer.
+     t_setmode           Specifies timer mode - interrupts on or off.
+     t_ask_timer         Gets accumulated activations and elapsed time
+                         for the specified timer
+     t_cvt_time          Converts microseconds to MM:SS.xxxxxx string.
+     t_reset             Resets one or all timers.
+     t_report            Generates timer report
+     t_name              Associates string with specified timer for
+                         display in timer report.
+     t_rname             Specifies title of timer report.
+     t_fname             Specifies destination file for timer report.
+     t_set_report        Specifies type of timer report generated.
+
+     t_entry  and  t_exit  provide  the  mechanism  to  start  and  stop  a
+     microsecond timer.  Timers are specified by number from 0 to n-1 in C,
+     and  1  to  n in Pascal.  The number of  timers  available  is  10  by
+     default, but the user can use  t_request  to request as many timers as
+     available heap allows.  Multiple timers may be active at the same time
+     if interrupts are enabled.
+
+     t_suspend and t_resume suspend and resume a timer previously activated
+     by t_entry.  Timer activation count is not  incremented  when t_resume
+     is called, which is useful if you are using timer activation counts to
+     track subroutine  activations in a profiling application, and for some
+     reason you wish to pause  the timer during the subroutine's activation
+     (perhaps before a call to another routine) and then restart it.
+
+     t_setmode  allows  the  user to specify whether  timers  operate  with
+     interrupts enabled or disabled.   With  interrupts  enabled, intervals
+     greater than 54925 microseconds may  be timed, and multiple timers may
+     be active concurrently.  With  interrupts  disabled,  the  timer logic
+     will "roll over" after 54925 usecs,  and  only one timer may be active
+     at any time.  Timing short duration events with interrupts disabled is
+
+
+
+
+                                    TCHRT  5
+
+
+
+
+
+     useful  if  background   system  interrupts  are  causing  significant
+     variations in timer results.
+
+     t_ask_timer will return to  the  user  the  activation count and total
+     elapsed time in microseconds for the specified timer.  t_cvt_time will
+     convert  a microsecond time count into a  printable  string  with  the
+     format MM:SS.xxxxxx.  Timer activation counts and  accumulated elapsed
+     time can be reset to zero by using t_reset.
+
+     t_report generates a complete  listing  of  all  timer activity.  This
+     listing can be directed to the display, a  disk  file,  or  a printer.
+     t_rname allows the user to give the timer report a  descriptive title.
+     t_fname overrides the default disk file name for  timer  reports going
+     to disk.  t_name allows the  user  to assign a descriptive text string
+     to  a  timer number - this string will be printed next  to  the  timer
+     number in the timer report.    Finally,  t_set_report  determines what
+     timers are listed on  the  timer report: either only those timers that
+     had  been activated, or all timers,  regardless  of  their  activation
+     count, up to the highest timer number activated.
+
+     BIOS Interrupt Timer Functions
+
+     This  class  of  functions   implement   the   BIOS   interrupt  timer
+     functionality.
+
+     t_bios_start        Installs timers in specified interrupt
+                         vectors.
+     t_bios_stop         Removes all timers from interrupt vectors.
+     t_bios_suspend      Suspends specified interrupt timing.
+     t_bios_resume       Resumes interrupt timing in the specified
+                         vectors.
+     t_bios_set_user     Assigns timer to user specified interrupt.
+     t_bios_set_file     Assigns interrupt function description file
+                         name to the user specified interrupt timer.
+     t_bios_ask          Returns activations and elapsed for the
+                         specified interrupt function
+     t_bios_reset        Resets one or all function timers of the
+                         specified interrupt vector.
+     t_bios_report       Generates BIOS interrupt timer report.
+     t_bios_rname        Specifies title of BIOS timer report.
+     t_bios_fname        Specifies destination file for BIOS timer
+                         report.
+
+     t_bios_start  initializes  BIOS interrupt timing  for  the  interrupts
+     specified.    Heap  is  allocated  for the required  data  structures,
+     interrupt function description files  are  loaded  if available, and a
+     new interrupt service  routine  for  each  interrupt  to  be  timed is
+     inserted in  the  interrupt  vector  table.    t_bios_stop essentially
+     reverses  this  process,  freeing  allocated  heap  and  restoring the
+     previous interrupt service vectors.    The  BIOS timer data structures
+     are separate from the generic timer structures, and thus t_request has
+     no effect on BIOS interrupt timer activity.
+
+     t_bios_suspend and  t_bios_resume allow the user to suspend and resume
+     BIOS interrupt timing  of  the specified interrupt(s).  All interrupts
+     to be timed must be installed by t_bios_start, but timing can  then be
+     immediately suspended by t_bios_suspend until the point in the program
+
+
+
+                                    TCHRT  6
+
+
+
+
+
+     that the user actually wants timing  to  begin, when it can be resumed
+     with t_bios_resume.
+
+     t_bios_set_user enables the user to specify an interrupt  to  be timed
+     that has not been provided for by TCHRT.  Each interrupt that is timed
+     requires new interrupt  service  routine that when activated, starts a
+     timer, calls the old vector, then stops the appropriate timer.   TCHRT
+     provides new timer ISRs for the major device, EMS,  Mouse,  and  MSDOS
+     interrupts, along with  a  spare  ISR  that  can be used for any other
+     interrupt the user might want to time.   t_bios_set_user  assigns this
+     spare timer ISR to the specified interrupt, allowing the user  to time
+     any interrupt vector in the PC environment.   If  the  interrupt  is a
+     software interrupt that has specific functions (as requested by the AH
+     register when the  interrupt  is  invoked)  the  user  may  specify an
+     interrupt function description  file using t_bios_set_file which loads
+     a text file containing interrupt function descriptions if that file is
+     in the current directory.    Interrupt  function description files are
+     provided for all the software interrupts TCHRT has standard timer ISRs
+     for.
+
+     t_bios_ask   and  t_bios_reset  function  like  their  generic   timer
+     counterparts and allow the user to request specific BIOS timer results
+     or to reset  those results to zero.
+
+     t_bios_report, t_bios_rname, and  t_bios_fname modify and generate the
+     BIOS timer report in the same way as their generic  timer counterparts
+     t_report, t_rname, and  t_fname  generate and modify the generic timer
+     report.
+
+     Be sure and carefully review the documentation for t_bios_start before
+     using the BIOS interrupt timing functions.
+
+     Delay Functions
+
+     This class of functions  implement  the  microsecond  resolution delay
+     functionality.
+
+     t_ask_delay         Requests parameters for requested delay time.
+     t_do_delay          Executes delay with interrupts disabled.
+     t_do_delay_wints    Executes delay with interrupts enabled.
+     t_calc_delay_ff     Optimizes delay calibration to a specified
+                         delay duration.
+     t_get_delay_ff      Returns delay calibration optimization.
+     t_set_delay_ff      Sets current delay calibration optimization.
+     t_min_delay         Returns minimum delay possible with current
+                         hardware.
+     t_res_delay         Returns delay resolution possible with
+                         current hardware
+
+     t_ask_delay   requests  delay  parameters  for  the  specified   delay
+     interval.    These  parameters  are  stored in a user allocated  TCHRT
+     defined  data structure and are passed  to  either  t_do_delay,  which
+     generates  the  delay  with  interrupts disabled, or t_do_delay_wints,
+     which generates the delay with interrupts enabled.
+
+     t_calc_delay_ff,  t_set_delay_ff, and t_get_delay_ff, allows the  user
+     to  have  the  TCHRT  delay  logic  "fine  tune"  its calibration to a
+
+
+
+                                    TCHRT  7
+
+
+
+
+
+     particular delay interval.   t_calc_delay_ff  calculates  and installs
+     the  new  delay  calibration  optimization, t_set_delay_ff enables the
+     user  to   install   a   previously   calculated   optimization,   and
+     t_get_delay_ff retrieves the current delay optimization.
+
+     t_min_delay returns the minimum  delay  possible  in the host run-time
+     environment.  t_res_delay returns the resolution of the delay function
+     in the host run-time environment.
+
+
+     Examples
+
+
+     While  the  accompanying  pages  spell  out the functions of TCHRT  in
+     detail, as the saying goes, "a picture is worth a thousand words".  In
+     keeping with that philosophy,  we  have  included several source files
+     that demonstrate different  areas  of TCHRT functionality. They are as
+     follows:
+
+     DEMO             Basic  TCHRT operation.  Shows inline and  subroutine
+                      timing, report generation.
+
+     TESTBIOS         BIOS interrupt timing.
+
+     SEEKTEST         Hard disk seek  test  benchmark.    Uses  both inline
+                      timers and BIOS interrupt timing to  fully  test disk
+                      seek performance.
+
+     DELAY            Demonstration of high resolution delay functionality.
+
+     WATCH            Full function Taylor Split stopwatch.   Shows  how to
+                      activate timers with a user written interrupt service
+                      routine.
+
+     These programs are carefully commented and  provide  valuable insights
+     into effective TCHRT operation.
+
+
+     Technical Support
+
+
+     Technical  support for licensed users of TCHRT  is  available  by  the
+     following methods:
+
+        1.  By US Mail directed to P.O. Box 22, Mt. Pleasant MI 48804.
+
+        2.  By   Compuserve  electronic   (Easyplex)   mail   directed   to
+            73047,1765.
+
+
+     Shareware
+
+
+     This software is distributed as "Shareware", which allows  you  to use
+     the complete product  on  an  evaluation  basis  to get a feel for its
+     quality, functionality, and value  to  you as a developer or end user.
+     At the end of your evaluation (14 days is a  widely  accepted time for
+
+
+
+                                    TCHRT  8
+
+
+
+
+
+     the evaluation period) you may continue to use the software product by
+     sending in a registration  fee  to  the  program author/vendor, or you
+     must discontinue use of the software and are free to pass your copy on
+     to another user for evaluation.   The Shareware concept allows quality
+     software  to   be  distributed  at  far  less  cost  than  traditional
+     commercial products, and allows the user to "try before you buy".
+
+     TCHRT is a single language functional subset of PCHRT,  the  PC  Timer
+     Toolbox distributed through traditional  commercial  channels  by Ryle
+     Design.   MSCHRT for Microsoft C and TPHRT for  Turbo  Pascal are also
+     available as Shareware, and  provide  the  same  suite of functions as
+     TCHRT.
+
+     Registration of TCHRT costs $20.00,  and in return users receive large
+     and small model object  libraries,  complete  library source code, and
+     technical support by US  Mail  and  Compuserv  Email.  Distribution of
+     TCHRT object code in commercial applications is not permitted.
+
+     Users  developing commerical applications or needing additional  timer
+     functionality should purchase PCHRT, the commerical version  of TCHRT,
+     which costs $49.95.  PCHRT includes all the functions of  TCHRT, along
+     with three  new timer functions, five new synchronous alarm functions,
+     four functions to run the timer tick interrupt at a user defined rate,
+     and two utilities to  time  execution  and  profile interrupts of most
+     executable programs without recompilation.  PCHRT comes with libraries
+     for  Turbo  C  and MSC in small, medium, compact, and large models, as
+     well  as units for Turbo Pascal V5 and V5.5.  Full library source code
+     for both Pascal and C is provided, along  with  a  printed  manual and
+     telephone technical support.  Distribution  of  PCHRT  object  code in
+     commercial applications is permitted without royalties.
+
+     An order form  for  these  products  appears  as the last page of this
+     document.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    TCHRT  9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    TCHRT  10
+
+
+
+
+
+
+
+
+
+
+
+                            TCHRT Function Reference
+
+
+     t_ask_delay
+
+
+     Purpose          Fills delay parameter structure with  required values
+                      for requested delay interval
+
+     C                void  t_ask_delay(long  unsigned  usec,  t_delay_type
+                      *dp)
+
+     Synopsis         Parameters accepted by the delay functions are stored
+                      in  a  TCHRT  defined,  user allocated data structure
+                      tdelay_type.   t_ask_delay accepts the desired  delay
+                      interval  in  microseconds,  and  fills   the  passed
+                      tdelay_type structure with the appropriate parameters
+                      to generate the requested delay.  This data structure
+                      is    then    passed    to   either   t_do_delay   or
+                      t_do_delay_wints,   where   the   actual   delay   is
+                      generated.
+
+     Caveat           None
+
+     See Also         t_do_delay, t_do_delay_wints
+
+
+     t_ask_timer
+
+
+     Purpose          Returns activation  and  elapsed  time  count  for  a
+                      specified timer
+
+     C                void t_ask_timer(int tnum, long unsigned  *hits, long
+                      unsigned *elapsed)
+
+     Synopsis         The  user may retrieve activation counts and  elapsed
+                      time  (in  microseconds)  for  the  specified  timer.
+                      Timers are specified from 0 to n-1 in C and from 1 to
+                      n in Pascal.  The number of timers n defaults  to 10,
+                      but t_request  may  be  called  prior  to  t_start to
+                      increase that number.
+
+     Caveat           No range  checking is done.  A NULL pointer reference
+                      is possible if information on a non-existant timer is
+                      requested.
+
+     See Also         t_request, t_reset
+
+
+
+
+
+
+                                    TCHRT  11
+
+
+
+
+
+     t_bios_ask
+
+
+     Purpose          Returns activation count and elapsed time for  one or
+                      all functions associated with a BIOS interrupt timer
+
+     C                void  t_bios_ask(int  whichint, int  whichfunc,  long
+                      unsigned *hits, long unsigned elapsed)
+
+     Synopsis         The users passes a single BIOS  timer  interrupt mask
+                      (see  t_bios_start) and either an interrupt  function
+                      in the range of 0 to 255 or -1, which causes  all the
+                      interrupt   function  timers  to  be  summed.     The
+                      accumulated number of activations and elapsed time in
+                      microseconds is returned.
+
+                      The summation of all function  timers  by  passing -1
+                      feature is useful if a hardware  interrupt  that does
+                      not have specific function  classes  is  being timed.
+                      Interrupt functions are  specified by the contents of
+                      the  AH  register,  and  since  the  AH  register may
+                      contain  random, non-specific values when a  hardware
+                      interrupt  is invoked, many timers for the  interrupt
+                      will show some activity.   These  must  be  summed in
+                      order to  determine  the  activity  of  the  hardware
+                      interrupt.
+
+     Caveat           No range  checking is done.  A NULL pointer reference
+                      is possible if information is  requested  on  an non-
+                      existant interrupt timer.
+
+     See Also         t_bios_start, t_bios_reset
+
+
+     t_bios_entry
+
+
+     Purpose          Receives  timer  start  requests  from  an  interrupt
+                      service routine
+
+     C                void t_bios_entry(int whichint, int whichfunc)
+
+     Synopsis         BIOS interrupt vectors  being timed call this routine
+                      to start the appropriate  timer  for  this interrupt.
+                      Parameter whichfunc is the value in  the  AH register
+                      when   the  interrupt  was  invoked,  which  is   the
+                      interrupt function requested in a software interrupt.
+
+     Caveat           This is  an internal TCHRT procedure and is not meant
+                      to be called by the user.
+
+     See Also         t_bios_exit
+
+
+
+
+
+
+
+
+                                    TCHRT  12
+
+
+
+
+
+     t_bios_exit
+
+
+     Purpose          Receives  interrupt  timer  stop  requests   from  an
+                      interrupt service routine
+
+     C                void t_bios_exit(int whichint)
+
+     Synopsis         BIOS interrupt vectors call this routine to  stop the
+                      appropriate timer for this  interrupt.    The current
+                      active function timer  for this interrupt is stopped,
+                      and  if  the  interrupt  was entered recursively, the
+                      previous function timer is restarted.
+
+     Caveat           This is  an internal TCHRT procedure and is not meant
+                      to be called by the user.
+
+     See Also         t_bios_entry
+
+
+     t_bios_fname
+
+
+     Purpose          Specifies a name for the  disk  file  created  by the
+                      BIOS timer report if the disk  destination  option is
+                      selected
+
+     C                void t_bios_fname(char *fname)
+
+     Synopsis         By calling t_bios_report(1)  the BIOS timer report is
+                      generated  and  sent  to  an  ASCII disk file.    The
+                      default  name   for   this   file   is  BIOSTIME.TXT.
+                      t_bios_fname  allows the user to specify a  different
+                      filename,   with   complete   disk,  path,  and  file
+                      specification.
+
+     Caveat           Maximum  disk/path/filename  string   length   is  67
+                      characters
+
+     See Also         t_bios_report
+
+
+     t_bios_load_desc
+
+
+     Purpose          Loads   an   interrupt   description  file  into  the
+                      appropriate interrupt timer data structure
+
+     C                void t_bios_load_desc(int whichint, char *data_file)
+
+     Synopsis         Each  interrupt  vector  being  timed   contains  256
+                      timers,  one for each possible interrupt function  as
+                      indicated  by  the  AH   register.      An  interrupt
+                      description  file  contains  brief  twenty  character
+                      descriptions  of  each  interrupt  function,  and  if
+                      loaded, these will appear  along  with  the interrupt
+                      function  number in the BIOS interrupt timer  report.
+
+
+
+                                    TCHRT  13
+
+
+
+
+
+                      whichint   is  a  BIOS  timer  interrupt  mask   (see
+                      t_bios_start),  and  data_file  is the disk/path/file
+                      descriptor.  No error is generated  if  the specified
+                      file is not found.
+
+                      See  one of the supplied interrupt description  files
+                      (such as 10.INT) for the layout of these files.
+
+                      This routine is called automatically by t_bios_start.
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible.
+
+     See Also         t_bios_start, t_bios_set_file
+
+
+     t_bios_report
+
+
+     Purpose          Generates BIOS interrupt timer report
+
+     C                void t_bios_report(int whereto)
+
+     Synopsis         This routine generates a  complete  timer  report for
+                      all active BIOS  interrupt timers.  whereto specifies
+                      the report's  destination - 0 sends the report to the
+                      display, 1 to a disk file, and 2 to a printer.
+
+     Caveat           None.
+
+     See Also         t_bios_rname, t_bios_fname
+
+
+     t_bios_resume
+
+
+     Purpose          Resumes suspended BIOS interrupt timing
+
+     C                void t_bios_resume(int biosmask)
+
+     Synopsis         This  routine  enables   previously   suspended  BIOS
+                      interrupt  timing.  biosmask contains the BIOS  timer
+                      bitmask (see t_bios_start)  of the interrupts to have
+                      timing re-enabled.
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible if a interrupt is  referenced  that  was not
+                      setup by t_bios_start.
+
+     See Also         t_bios_suspend, t_bios_start
+
+
+     t_bios_reset
+
+
+     Purpose          Resets one or  all  timers  associated  with  a timed
+                      interrupt
+
+
+
+                                    TCHRT  14
+
+
+
+
+
+     C                void t_bios_reset(int whichint, int whichfunc)
+
+     Synopsis         This function allows the  user  to  reset  either one
+                      specific  or  all  function  timers associated with a
+                      timed interrupt.  Specific function timers are in the
+                      range of 0 to 255.  Passing -1  for  whichfunc resets
+                      all  256  timers  associated  with a timed interrupt.
+                      The interrupt is specified  by  whichint  which  is a
+                      single BIOS interrupt timer mask (see t_bios_start).
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible   if  a  non-existant  interrupt  timer   is
+                      specified.
+
+     See Also         t_bios_start, t_bios_ask
+
+
+     t_bios_rname
+
+
+     Purpose          Specifies title for BIOS timer report
+
+     C                void t_bios_rname(char *rname)
+
+     Synopsis         This function  allows the user to specify a title for
+                      the  BIOS  interrupt  timer  report.    If   none  is
+                      specified,  the  title  used  is Bios Interrupt Timer
+                      Summary.  The title is horizontally centered.
+
+     Caveat           Max string length is 80 characters.
+
+     See Also         t_bios_report, t_bios_fname
+
+
+     t_bios_set_file
+
+
+     Purpose          Sets the interrupt  function description file for the
+                      user specified interrupt timer
+
+     C                void t_bios_set_file(char *user_int_file)
+
+     Synopsis         When a user specifies the optional interrupt  to time
+                      using  t_bios_set_user, a file of interrupt  function
+                      descriptions   may  also  be  specified  using   this
+                      function.
+
+     Caveat           Max file description length is 67 characters.
+
+     See Also         t_bios_load_desc, t_bios_set_file
+
+
+     t_bios_set_user
+
+
+     Purpose          Specifies the optional interrupt to time
+
+
+
+
+                                    TCHRT  15
+
+
+
+
+
+     C                void t_bios_set_user(int user_int)
+
+     Synopsis         The  TCHRT  BIOS timing functionality  has  built  in
+                      support for the various BIOS interrupts of interest -
+                      disk, CRT, serial,  parallel, DOS, EMS, keyboard, and
+                      mouse.   This function allows the user to specify any
+                      other interrupt to be timed, and when t_bios_start is
+                      invoked with the  USER  bit set in the timer bitmask,
+                      the interrupt specified by t_bios_set_user  will have
+                      timers inserted in its vector.
+
+     Caveat           The  ISR  supplied  that  is  hooked  into  the  user
+                      specified interrupt (t_new_user in the  .ASM modules)
+                      does not propagate the  FLAGS  register.   If you are
+                      attempting to time  a software interrupt that returns
+                      meaningful information  in  the  FLAGS  register, you
+                      should  modify  the  t_new_user  routine so that it's
+                      last instruction is a RETF 2 instead of  IRET.   This
+                      is documented in the t_new_user code.
+
+     See Also         t_bios_start, t_bios_set_file
+
+
+     t_bios_start
+
+
+     Purpose          Initializes BIOS interrupt timing
+
+     C                int t_bios_start(int biosmask)
+
+     Synopsis         This function initializes BIOS interrupt timing.  The
+                      interrupts to be timed are  selected  by  passing the
+                      appropriate bitmask:
+
+                      CRT10       INT 10h Video Services
+
+                      DISK        INT 13h Disk Services
+
+                      COM         INT 14h Serial Port Services
+
+                      KEYBD       INT 16h Keyboard Services
+
+                      PRT         INT 17h Printer Services
+
+                      DOS21       INT 21h MSDOS System Services
+
+                      MOUSE       INT 33h Mouse Services
+
+                      EMS         INT 67h EMS Services
+
+                      USER        User Specified Interrupt
+
+                      As an  example, to insert timers in the DOS interrupt
+                      and   the   disk   interrupt,   one    would   invoke
+                      t_bios_start(DISK+DOS21).
+
+
+
+
+
+                                    TCHRT  16
+
+
+
+
+
+                      Each  interrupt timed  actually  has  256  individual
+                      timers,  one  for  each  possible  value  in  the  AH
+                      register,  which indicates what specific function  of
+                      that interrupt has been requested.    The  timer data
+                      structure   is   allocated  dynamically,   and   each
+                      structure requires approximately 9200 bytes, so there
+                      is a limit imposed by  the memory model being used as
+                      to  how  many  interrupt  timers  may  be  requested.
+                      t_bios_start returns FALSE  in  C  if  the  amount of
+                      memory  needed  is not available,  while  a  run-time
+                      error occurs in Turbo Pascal.
+
+                      If the USER bitmask is  to  be  used, t_bios_set_user
+                      must  be  invoked  prior  to t_bios_start to indicate
+                      what interrupt the USER bitmask will time.
+
+                      Interrupt   function   description  files   for   the
+                      supported interrupts are supplied, and will be loaded
+                      if they are present  in  the  run-time directory.  As
+                      these  will  dramatically  improve  the   information
+                      presented in the BIOS  interrupt  timer  report, they
+                      are  recommended.  t_bios_set_file associates a  file
+                      with the USER selected interrupt.
+
+                      If testing code with  BIOS  interrupt  timing active,
+                      and the code fails prior to calling t_bios_stop, then
+                      you  should immediately reboot your computer, as  the
+                      interrupt vectors being timed  are  pointing  to non-
+                      existant code.
+
+     Caveat           Approximately  9200  bytes  are  required   for  each
+                      interrupt to be timed.  Memory constraints can affect
+                      this function.
+
+     See Also         t_bios_stop,     t_bios_set_user,    t_bios_set_file,
+                      t_bios_suspend, t_bios_resume
+
+
+     t_bios_stop
+
+
+     Purpose          Stops all BIOS interrupt timing
+
+     C                void t_bios_stop(void)
+
+     Synopsis         This  function removes all timers from all  interrupt
+                      vectors selected by t_bios_start and  deallocates all
+                      memory associated with those timers.
+
+     Caveat           This function must be called prior to program exit in
+                      order to restore the interrupt environment.    If the
+                      code under  test  fails  prior  to  t_bios_start  the
+                      interrupt  vectors  being  timed  will be pointing to
+                      non-existant code, and a system hang is likely.
+
+     See Also         t_bios_start, t_bios_suspend, t_bios_resume
+
+
+
+
+                                    TCHRT  17
+
+
+
+
+
+     t_bios_suspend
+
+
+     Purpose          Suspends interrupt timing selected by t_bios_start
+
+     C                void t_bios_suspend(int biosmask)
+
+     Synopsis         BIOS  interrupt timing is initiated by  t_bios_start,
+                      and terminated by t_bios_stop.   t_bios_suspend gives
+                      the user the ability to selectively disable timing on
+                      a particular interrupt or  interrupts  by  passing an
+                      appropriate  biosmask  (see   t_bios_start).     This
+                      suspended interrupt timing may  be  later  resumed by
+                      invoking t_bios_resume.
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible   if  a  non-existant  interrupt  timer   is
+                      referenced.
+
+     See Also         t_bios_resume, t_bios_start, t_bios_stop
+
+
+     t_calc_delay_ff
+
+
+     Purpose          Optimizes  delay calibration  for  a  specific  delay
+                      interval
+
+     C                float t_calc_delay_ff(long  unsigned  delay_time, int
+                      ints_or_not)
+
+     Synopsis         This  function  optimizes  delay  calibration   to  a
+                      specific  delay interval.  ints_or_not can be  either
+                      INTS_ON,  indicating a delay with interrupts  enabled
+                      should  be used for the optimization calculation,  or
+                      NO_INTS_ON,   which  indicates  that  a  delay   with
+                      interrupts disabled should be  used.    This function
+                      sets a  global value that is used by t_ask_delay, and
+                      the value is also returned,  so that it may be stored
+                      for later use with the delay interval optimized.
+
+     Caveat           None
+
+     See Also         t_set_delay_ff, t_get_delay_ff, t_ask_delay
+
+
+     t_calib
+
+
+     Purpose          Calibrates the TCHRT timer and delay logic
+
+     C                void t_calib(void)
+
+     Synopsis         This function calibrates the  low  level  TCHRT timer
+                      and delay logic.   It  is  called  by t_start, so the
+                      user  need  not  explicitly  call this routine unless
+                      additional delay calibration is needed after a system
+
+
+
+                                    TCHRT  18
+
+
+
+
+
+                      parameter has been  modified  during a timing run - a
+                      keyboard initiated system clock  speed  change  is an
+                      example.    t_calib  calls t_delay_calib to calibrate
+                      the TCHRT delay logic.
+
+     Caveat           None
+
+     See Also         t_delay_calib
+
+
+     t_cvt_time
+
+
+     Purpose          Converts a microsecond count to a MM:SS.xxxxxx format
+                      string
+
+     C                char    *t_cvt_time(long    unsigned    usecs,   char
+                      *time_string)
+
+     Synopsis         This function accepts a microsecond count and returns
+                      a printable character string in a simple time format.
+                      This function is useful to  the  user  who  wishes to
+                      build custom timer reports.
+
+     Caveat           Destination string length should be 13 characters.
+
+     See Also         t_ask_timer, t_bios_ask
+
+
+     t_delay_calib
+
+
+     Purpose          Calibrates the TCHRT delay logic
+
+     C                void t_delay_calib(void)
+
+     Synopsis         This  function  calibrates the delay  loops  used  to
+                      generate  precision  microsecond  delays.  Additional
+                      calibration   is   available   from  t_calc_delay_ff.
+                      t_delay_calib is called by t_calib, so the  user need
+                      not call it explicitly.
+
+     Caveat           None
+
+     See Also         t_calib, t_calc_delay_ff
+
+
+     t_diff
+
+
+     Purpose          Calculates  the difference  between  two  TCHRT  time
+                      stamps
+
+     C                long  unsigned  t_diff(TCHRT_type  *start, TCHRT_type
+                      *stop)
+
+
+
+
+
+                                    TCHRT  19
+
+
+
+
+
+     Synopsis         This function returns the difference  in microseconds
+                      between two TCHRT time stamps, which are generated by
+                      calls  to  t_get.   t_diff and t_get  are  low  level
+                      functions  that  are  of  interest primarily to users
+                      building timer functions not implemented in TCHRT.
+
+     Caveat           Don't pass the time stamps in the wrong order.
+
+     See Also         t_get
+
+
+     t_do_delay
+
+
+     Purpose          Generates   a   precision  microsecond   delay   with
+                      interrupts disabled
+
+     C                void t_do_delay(tdelay_type *delay_params)
+
+     Synopsis         This function generates a precision microsecond delay
+                      with interrupts disabled.   Using  this  function for
+                      delays greater than 54925 microseconds will cause the
+                      PC  clock to lose time.   Delay  parameters  of  type
+                      tdelay_type for  the  delay  interval  desired    are
+                      generated by t_ask_delay.
+
+                      Delay interval error will be in the range  of  one to
+                      three percent if t_calc_delay_ff is not used, zero to
+                      one percent if it is.
+
+     Caveat           Interrupts are disabled during the delay period
+
+     See Also         t_ask_delay, t_calc_delay_ff, t_do_delay_wints
+
+
+     t_do_delay_wints
+
+
+     Purpose          Generates   a   precision  microsecond   delay   with
+                      interrupts enabled
+
+     C                void t_do_delay_wints(tdelay_type : *delay_params)
+
+     Synopsis         This function is  identical to t_do_delay except that
+                      interrupts are  enabled  during  the  delay interval.
+                      This  will  introduce some additional  error  in  the
+                      delay produced, but is more appropriate for  longer (
+                      > 54925  usec)  delays.    Delay  parameters  of type
+                      tdelay_type for  the  delay  interval  desired    are
+                      generated by t_ask_delay.
+
+                      Delay interval error will be in the range  of  one to
+                      three percent if t_calc_delay_ff is not used, zero to
+                      one percent if it is.
+
+     Caveat           Interrupt  activity  may  cause  random errors in the
+                      delay interval produced.
+
+
+
+                                    TCHRT  20
+
+
+
+
+
+     See Also         t_do_delay, t_ask_delay, t_calc_delay_ff
+
+
+     t_entry
+
+
+     Purpose          Starts the specified general purpose timer
+
+     C                void t_entry(int timernum)
+
+     Synopsis         This   function   starts   a  general  purpose  timer
+                      counting.  Timers are specified from 0 to  n-1  in C,
+                      and from 1  to  n  in  Pascal.  The default number of
+                      timers  is  10,  but that can be  modified  prior  to
+                      calling t_start  by  passing  the  number  of  timers
+                      needed to t_request.
+
+                      Interrupts  are  normally  enabled  during  a  timing
+                      interval.    t_setmode  can   be   used   to  disable
+                      interrupts during any or all timing intervals.
+
+     Caveat           No range checking is done.    NULL  pointer reference
+                      possible if non-existant timer is started.
+
+     See Also         t_exit, t_setmode
+
+
+
+     t_exit
+
+
+     Purpose          Stops the specified general purpose timer
+
+     C                void t_exit(int timernum)
+
+     Synopsis         This function stops a general purpose timer counting.
+                      Activation count and accumulated elapsed time for the
+                      specified  timer  is  updated.   Timers are specified
+                      from  0 to n-1 in C, and from 1 to n in Pascal.   The
+                      default  number  of  timers is 10, but  that  can  be
+                      modified  prior  to calling t_start  by  passing  the
+                      number of timers needed to t_request.
+
+     Caveat           No range checking is done.    NULL  pointer reference
+                      possible if non-existant timer is started.
+
+     See Also         t_entry
+
+
+     t_fname
+
+
+     Purpose          Changes name of timer report file
+
+     C                void t_fname(char *filename)
+
+
+
+
+
+                                    TCHRT  21
+
+
+
+
+
+     Synopsis         t_report can send its  output  to  a disk file, which
+                      has the default name TIMER.TXT.  This function allows
+                      the user to assign a different disk/path/file name to
+                      this file.
+
+     Caveat           No  checking  is  done  to  determine  if   the  file
+                      description is valid.  Maximum  string  length  is 67
+                      characters.
+
+     See Also         t_rname, t_report
+
+
+     t_get
+
+
+     Purpose          Retrieves  a   high   resolution   time   stamp  with
+                      interrupts enabled
+
+     C                void t_get(TCHRT_type *timestamp)
+
+     Synopsis         This function interrogates the  8253  timer  chip and
+                      the low 16  bits  of  the  DOS time of day data words
+                      fills  the passed TCHRT_type data structure with  the
+                      microsecond  resolution  timestamp.    This   is  the
+                      fundamental unit of time for TCHRT.  The elapsed time
+                      between two TCHRT_type  time stamps may be determined
+                      by t_diff.
+
+     Caveat           Interrupts are enabled when t_get returns.
+
+     See Also         t_hires_entry, t_hires_exit
+
+
+     t_get_delay_ff
+
+
+     Purpose          Retrieves the current delay calibration optimization
+
+     C                float t_get_delay_ff(void)
+
+     Synopsis         t_calc_delay_ff  calculates  and  installs  a   delay
+                      calibration  optimization  for   a   specified  delay
+                      interval length.  Using this  additional optimization
+                      can  vastly  improve  the  TCHRT  delay  accuracy  in
+                      critical  applications.    t_get_delay_ff returns the
+                      current  delay  calibration optimization  in  effect.
+                      The default value (i.e. - no additional optimization)
+                      is 1.00.
+
+     Caveat           None
+
+     See Also         t_calc_delay_ff, t_set_delay_ff
+
+
+
+
+
+
+
+
+                                    TCHRT  22
+
+
+
+
+
+     t_hires_entry
+
+
+     Purpose          Initiates timing with interrupts disabled
+
+     C                void t_hires_entry(TCHRT_type *timestamp)
+
+     Synopsis         This   function,   like   t_get,  retrieves  a  TCHRT
+                      timestamp from the timing  hardware.    Unlike t_get,
+                      t_hires_entry resets the 8253 timer  chip  to  0, and
+                      interrupts are disabled at exit.  This  facilitates a
+                      timing mode (set by  t_setmode)  that  functions with
+                      interrupts disabled.
+
+     Caveat           Since the 8253 is reset, only one timer may be active
+                      at  any  one  time.  The timer will "roll over" after
+                      54925  usec,  so  this  mode  is  suitable  for short
+                      duration timing  only.  This is a low level function,
+                      and is not meant to be called by the user.
+
+     See Also         t_hires_exit, t_setmode
+
+
+     t_hires_exit
+
+
+     Purpose          Concludes a timing interval with interrupts disabled
+
+     C                void t_hires_exit(TCHRT_type *timestamp)
+
+     Synopsis         This  is the companion function to t_hires_entry  and
+                      completes a timing interval with interrupts disabled.
+                      At exit interrupts are enabled.
+
+     Caveat           See t_hires_entry.
+
+     See Also         t_hires_entry, t_setmode
+
+
+     t_hook_int
+
+
+     Purpose          Installs timers in the specified interrupt vector
+
+     C                void t_hook_int(int int_no)
+
+     Synopsis         This  function  installs  timers  in   the  specified
+                      interrupt  vector  to enable precise  timing  of  the
+                      interrupt activity.
+
+     Caveat           This is a low  level  function and is not meant to be
+                      called by  the user.  Users wishing to understand how
+                      TCHRT interrupt timing is accomplished should inspect
+                      the source code to this routine.
+
+     See Also         t_unhook_int
+
+
+
+
+                                    TCHRT  23
+
+
+
+
+
+     t_min_delay
+
+
+     Purpose          Returns   minimum   delay   possible   in    run-time
+                      environment
+
+     C                long unsigned t_min_delay(void)
+
+     Synopsis         The minimum delay interval that can  be  generated by
+                      t_do_delay  or t_do_delay_wints varies with the  run-
+                      time hardware environment.  This function returns the
+                      minimum  delay in microseconds that can be  generated
+                      in the current environment.
+
+     Caveat           None
+
+     See Also         t_res_delay
+
+
+     t_name
+
+
+     Purpose          Associates a descriptive string with a generic timer
+
+     C                void t_name(int timerno, char *timername)
+
+     Synopsis         This  functions  assigns   a  string  of  maximum  20
+                      characters to the specified generic timer number, and
+                      this string  is  then  displayed  next  to  the timer
+                      number in the timer report generated by t_report.
+
+     Caveat           Maximum string length is 20 characters.
+
+     See Also         None
+
+
+     t_report
+
+
+     Purpose          Generates a report of all generic timer activity
+
+     C                void t_report(int whereto)
+
+     Synopsis         This  function  generates   a  report  of  all  timer
+                      activity that was generated using t_entry and t_exit.
+                      Parameter whereto specifies the report's destination:
+                      0 sends the report to the CRT display, 1 sends  it to
+                      a  disk file, and 2 sends it to  the  printer.    The
+                      report  may  have  a  title  (see  t_rname),  and the
+                      destination  disk   file   (if   used)   defaults  to
+                      TIMER.TXT, but this can modified (see t_fname).
+
+                      Timer  reports  have   two  formats,  and  these  are
+                      selected by t_set_report.   The HIGHWATER report type
+                      shows  the  activity  of  all timers, including those
+                      with zero activation counts, up to the highest number
+
+
+
+
+                                    TCHRT  24
+
+
+
+
+
+                      timer activated.  The NONZERO report type  only shows
+                      timers with nonzero activation counts.
+
+     Caveat           None
+
+     See Also         t_rname, t_fname, t_set_report
+
+
+     t_request
+
+
+     Purpose          Request specific number of generic timers
+
+     C                void t_request(int numtimer)
+
+     Synopsis         t_request  provides  a  mechanism  to   override  the
+                      default   number  of  generic  timers  allocated   by
+                      t_start.  If the user requires more (or less) than 10
+                      timers,   the  number  required  may  be  passed   to
+                      t_request, and t_start  will attempt to allocate this
+                      number of timers.
+
+     Caveat           Call before t_start.
+
+     See Also         t_start
+
+
+     t_res_delay
+
+
+     Purpose          Retrieves delay resolution of run-time environment
+
+     C                long unsigned t_res_delay(void)
+
+     Synopsis         In slower hardware environments, the delay resolution
+                      of t_do_delay  and  t_do_delay_wints  may  be several
+                      microseconds.   This  function  returns  the run-time
+                      delay resolution in units of tenths of a microsecond.
+                      For example, if t_res_delay returns  a  value  of 44,
+                      that means the delay  functions  can  generate delays
+                      starting  at   their   minimum   delay   length  (see
+                      t_min_delay)   and   up    in   increments   of   4.4
+                      microseconds.
+
+     Caveat           None
+
+     See Also         t_min_delay
+
+
+     t_reset
+
+
+     Purpose          Resets one or all generic timers
+
+     C                void t_reset(int timernum)
+
+
+
+
+
+                                    TCHRT  25
+
+
+
+
+
+     Synopsis         This  function  zeros  the accumulated activation and
+                      elapsed timer counts for  a  specified  timer  in the
+                      range of 0  to  n-1 in C, or 1 to n in Pascal.  If -1
+                      is passed, all generic timers are reset.
+
+     Caveat           No range checking is done.  Null pointer reference is
+                      possible if a non-existant timer is specified.
+
+     See Also         t_ask_timer
+
+
+     t_resume
+
+
+     Purpose          Resumes a suspended generic timer
+
+     C                void t_resume(int tnum)
+
+     Synopsis         Functions t_suspend and t_resume  allow  the  user to
+                      stop and restart an active timer without incrementing
+                      its activation count.
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible if a non-existant timer is specified.
+
+     See Also         t_suspend
+
+
+     t_rname
+
+
+     Purpose          Assigns a title to the timer report
+
+     C                void t_rname(char *report_title)
+
+     Synopsis         The  generic  timer  report  generated   by  t_report
+                      contains   a   horizontally   centered  title,  which
+                      defaults to Timer Summary.  This function  allows the
+                      user to specify an alternate title.
+
+     Caveat           Max string length is 80 characters.
+
+     See Also         t_report, t_fname
+
+
+     t_set_delay_ff
+
+
+     Purpose          Sets delay calibration optimization
+
+     C                void t_set_delay_ff(float delay_ff)
+
+     Synopsis         This function allows the  user  to  set the new delay
+                      calibration  optimization  for  use  by  t_ask_delay.
+                      Delay  calibration optimization  for  a  given  delay
+                      interval  can be automatically calculated and set  by
+                      t_calc_delay_ff.  Calling t_set_delay_ff with a value
+
+
+
+                                    TCHRT  26
+
+
+
+
+
+                      of  1.00  removes  any delay calibration optimization
+                      that was in effect.
+
+     Caveat           None
+
+     See Also         t_calc_delay_ff, t_get_delay_ff, t_ask_delay
+
+
+     t_setmode
+
+
+     Purpose          Sets generic timing mode
+
+     C                void t_setmode(int modetype)
+
+     Synopsis         Two modes of generic  timing  are  available: INTS_ON
+                      enables generic timing  using t_entry and t_exit with
+                      interrupts  enabled,  and  this  is the default mode.
+                      NO_INTS_ON enables timing  with  interrupts disabled,
+                      and this mode  is particularly suitable for extremely
+                      short  duration  timing  that   may   be   skewed  by
+                      background interrupt activity.   In  this  mode, only
+                      one timer may be active at any time,  and  each timer
+                      will   "roll   over"   after  54925  microseconds  of
+                      continuous activation.
+
+                      As long as only one timer is active at once,  the two
+                      timer modes may be freely  mixed.  In order to change
+                      modes, call t_setmode with the desired mode  prior to
+                      calling the t_entry/t_exit functions.
+
+     Caveat           NO_INTS_ON  mode  is  not  compatible  with  multiple
+                      active timers or BIOS interrupt timing.
+
+     See Also         None
+
+
+     t_start
+
+
+     Purpose          Initializes TCHRT timing functions
+
+     C                int  t_start(void)
+
+     Synopsis         This function  initializes  the  entire  TCHRT timing
+                      system, and must  be  called prior to any other TCHRT
+                      functions with the  exception  of  t_request.    If a
+                      different  number  of  timers  other than the default
+                      number provided (10) is required, t_request should be
+                      called prior to t_start to specify the number needed.
+                      In C,  if t_start can allocate enough heap to fulfill
+                      the timer  request,  it  will  do  so,  calibrate the
+                      timing  system,  and  return  TRUE.    If  the memory
+                      request  fails,  it  will  return  FALSE.    In Turbo
+                      Pascal, memory allocation failure  will  result  in a
+                      run-time error.  Each timer requires approximately 35
+                      bytes of heap.
+
+
+
+                                    TCHRT  27
+
+
+
+
+
+                      The 8253 timer chip is set to mode 2.
+
+     Caveat           None
+
+     See Also         t_request, t_stop
+
+
+     t_stop
+
+
+     Purpose          Shuts down TCHRT timing logic
+
+     C                void t_stop(void)
+
+     Synopsis         This  function  deallocates  all heap associated with
+                      generic timers and restores the  8253  timer  chip to
+                      mode 3.  It must be called prior to program exit, and
+                      no TCHRT calls (except t_request) are valid without a
+                      call to t_start to reinitialize the timing system.
+
+     Caveat           None
+
+     See Also         t_start, t_request
+
+
+     t_suspend
+
+
+     Purpose          Suspends an active generic timer
+
+     C                void t_suspend(int tnum)
+
+     Synopsis         Functions t_suspend and t_resume  allow  the  user to
+                      stop and restart an active timer without incrementing
+                      its activation count.
+
+     Caveat           No range checking is done.  NULL pointer reference is
+                      possible if a non-existant timer is specified.
+
+     See Also         t_resume
+
+
+     t_unhook_int
+
+
+     Purpose          Removes timers from the specified interrupt vector
+
+     C                void t_unhook_int(int int_no)
+
+     Synopsis         This  function  removes  timers  from  the  specified
+                      interrupt  vector  to  disable  precise timing of the
+                      interrupt activity.
+
+     Caveat           This is a low  level  function and is not meant to be
+                      called by  the user.  Users wishing to understand how
+                      TCHRT interrupt timing is  accomplished  may  want to
+                      inspect the source code to this routine.
+
+
+
+                                    TCHRT  28
+
+
+
+
+
+     See Also         t_hook_int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    TCHRT  29
+
+
+
+
+                            TCHRT V3.00 Registration
+
+
+     Name ______________________________ Company ______________________________
+
+     Address __________________________________________________________________
+
+     City/State/Zip ___________________________________________________________
+
+     Telephone _______________________ Got TCHRT from _________________________
+
+     Version 3 Single Language Timer Toolboxes.  Includes large & small
+     model libraries (C), full library source, support by US Mail or
+     Compuserve Email.  License does not permit commercial distribution
+     of object code.
+
+     Qty _____ TCHRT V3 for Turbo C @ $20.00 each ..................... _______
+
+     Qty _____ MSCHRT V3 for Microsoft C @ $20.00 each ................ _______
+
+     Qty _____ TPHRT V3 for Turbo Pascal 5 & 5.5 @ $20.00 each ........ _______
+
+     Version 4 Timer  Toolbox. Supports  TC & MSC in small, medium,
+     compact, and large models, Turbo Pascal 5 & 5.5.  20 additional
+     functions to manage timers, profile interrupts, generate synchronous
+     alarms, run the timer tick interrupt at a user specified rate.
+     Two standalone utilities time execution and profile interrupts of
+     most executable programs without recompilation.  Full library
+     source in C & Pascal included.  Printed manual.  Support by
+     telephone, US Mail or Compuserv Email.  License  permits
+     commercial distribution of object code.
+
+     Qty ______ PCHRT V4.00 @ $49.95 each ............................. _______
+
+     Shipping in USA @ $2.00 .......................................... _______
+
+     Shipping outside USA @ $4.00 ..................................... _______
+
+     Subtotal ......................................................... _______
+
+     Michigan residents add 4% ........................................ _______
+
+     Total enclosed ................................................... _______
+
+
+     Payment method:  ___Check  ___Money Order  ___VISA  ___MasterCard
+
+     Card # ____________________________________________ Exp _________
+
+     Signature _________________________________________
+
+     Remit to Ryle Design, P.O. Box 22, Mt. Pleasant, MI 48804
+
+     Credit  card  customers  may  order  by  Email  on Compuserve  to
+     73047,1765,  or  by telephone at (517) 773-0587.  This is a voice
+     mail system.  Leave your name and number in voice mailbox #2, and
+     your call will be returned and your order taken.
+
+     Thank you!
+
+                                   TCHRT  30
+

@@ -1,0 +1,5 @@
+FLAG c
+LIST mandel.map
+INPUT mandel.trl mlibp.trl
+ENTRY main
+LIB t8lib.tll

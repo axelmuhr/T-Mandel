@@ -1,0 +1,102 @@
+#  MAKEFILE for Mandelbrot program.
+#  Set Borland C compiler and Logical System C compiler path.
+#
+# Heavily altered by Axel Muhr in 2009
+# + corrected tlink libs-order to circumvent float error
+# + added make rule for screen2.obj
+#
+# Caveat: Keep your path to the Borland tools short, else you'll
+#         reach the 128 chars-per-commandline limit quick!
+#
+#         To execute this make-file you'll need the 1989 version
+#         of the LSC compiler and use the supplied 'lscmake.exe'
+#         (from the 1993 version) for this.
+
+# MACRO DEFINITIONS:
+
+.SUFFIXES:
+
+.SUFFIXES: .c .tal .tld .arr .exe
+
+# change these according to your system. Keep them SHORT!
+BCLIB=C:\dev\bc\lib
+BCINC=c:\dev\bc\include
+BCBIN=c:\dev\bc\bin
+LSCBIN=c:\trans\lsc\89\bin
+
+
+#lsc c rule
+.c.tal:
+  $(LSCBIN)\pp $*.c
+# no debugging information, for any processor, relocatable
+  $(LSCBIN)\tcx $* -cf1p0r
+
+#tcode assemble rule
+.tal.tld:
+    $(LSCBIN)\tasm $* -cv
+    $(LSCBIN)\vtlnk $*.lnk
+
+#tcode assemble rule
+.tal.trl:
+    $(LSCBIN)\ttasm $* -cv
+
+#rule to make c arrays from .tld files
+.tld.arr:
+    ltoc  $*
+    mkarr $*
+
+man:  man.exe
+
+#try:  hostry.exe
+
+man.exe:  man.obj screen2.obj lkio.obj
+  $(BCBIN)\tlink -v  $(BCLIB)\c0s.obj man.obj screen2.obj lkio.obj,man.exe,,tchrts $(BCLIB)\emu $(BCLIB)\maths $(BCLIB)\cs
+  del *.bin
+  del *.arr
+  del *.pp
+  del *.trl
+  del *.tld
+  del *.map
+  del mandel.tal
+  del smallman.tal
+  del mlibs.tal
+  del mlibp.tal
+
+man.obj:  man.c  sreset.arr flboot.arr flload.arr ident.arr \
+	  mandel.arr smallman.arr
+  $(BCBIN)\bcc -c -v -ms -Fs -w999 -I$(BCINC) man.c
+
+lkio.obj:    lkio.asm
+   $(LSCBIN)\tasm -zi lkio.asm
+
+screen2.obj:    screen2.asm
+   $(LSCBIN)\tasm -zi screen2.asm
+
+mandel.tal:  mandel.c
+mandel.tld:  mandel.tal mlibp.trl mandel.lnk
+mandel.arr:  mandel.tld
+
+smallman.tal:  smallman.c
+smallman.tld:  smallman.tal mlibs.trl smallman.lnk
+smallman.arr:  smallman.tld
+
+
+mlibs.tal:  mlibs.c
+mlibs.trl:  mlibs.tal
+
+mlibp.tal:  mlibp.c
+mlibp.trl:  mlibp.tal
+
+sreset.arr: sreset.tld
+sreset.tld: sreset.tal
+
+flboot.arr: flboot.tld
+flboot.tld: flboot.tal
+
+flload.arr: flload.tld
+flload.tld: flload.tal
+
+ident.arr: ident.tld
+ident.tld: ident.tal
+
+

@@ -1,0 +1,126 @@
+;******************************* FLLOAD.TAL ********************************
+;  (C) Copyright 1987-1993  Computer System Architects, Provo UT.           *
+;  This  program is the property of Computer System Architects (CSA)        *
+;  and is provided only as an example of a transputer/PC program for        *
+;  use  with CSA's Transputer Education Kit and other transputer products.  *
+;  You may freely distribute copies or modifiy the program as a whole or in *
+;  part, provided you insert in each copy appropriate copyright notices and *
+;  disclaimer of warranty and send to CSA a copy of any modifications which *
+;  you plan to distribute.						    *
+;  This program is provided as is without warranty of any kind. CSA is not  *
+;  responsible for any damages arising out of the use of this program.      *
+
+;***************************************************************************/
+;****************************************************************************
+; This program  loads the transputer program code into memory. The
+; program is loaded through boot link of the transputer.
+; FLLOADS receives packet of upto 255 bytes ins size. A packet length of 0
+; indicates end of code. After reciving all the code, FLLOADS sets up the
+; workspace pointer and calls the code entry point.
+;****************************************************************************
+	.t800
+;  val definitions
+
+	.val    RESERVE,16
+	.val    CALLWSP,-4
+	.val    INITIME,0
+	.val    DELAY,16*2
+        .val    LOCTOP,16
+
+        .val    MININT,1
+        .val    DBLINK,1
+        .val    MEMSTART,2
+        .val    BOOTIN,3
+	.val    BOOTOUT,4               ;5 and 6 contain links out
+        .val    LDSTART,7               ;zeroed during BOOTOUT save
+	.val    ENTRYP,8
+        .val    WSPACE,9
+        .val    LDADDR,10
+        .val    TRANTYPE,11
+        .val    CODELEN,12              ;high order bytes must stay zeroed
+        .val    BIDX,12
+        .val    LOOPA,13
+        .val    LOOPB,14
+        .val    TLINK,15
+        .val    WSP,15
+
+	.val    OBUFWS,6
+        .val    OLOCAL,3
+	.val    OSTATIC,1
+        .val    OLINK,2
+
+;
+        .pub    START
+;
+;       mini distributing loader
+;
+;
+;
+START:  ldl     LDSTART                 ;setup current load address
+	stl     LDADDR
+        ldc     0                       ;zero upper bytes of CODELEN
+	stl     CODELEN
+L1:     ldlp    CODELEN                 ;input code length
+        ldl     BOOTIN
+        ldc     1
+        in
+        ldl     CODELEN                 ;if CODELEN <> 0
+        cj      @L2
+        ldl     LDADDR                  ;input code
+        ldl     BOOTIN
+        ldl     CODELEN
+        in
+L2:     ldc     0                       ;loop i:= 0 for 3 each BOOTOUT link
+        stl     LOOPA
+	ldc     3
+        stl     LOOPB
+L3:
+        ldl     LOOPA                   ;TLINK:= @OOTOUT[i]
+        ldlp    BOOTOUT
+        wsub
+        ldnl    0
+        stl     TLINK
+        ldl     TLINK                   ;if TLINK <> 0
+        cj      @L4
+        ldlp    CODELEN                 ;send out length to neighbors
+	ldl     TLINK
+        ldc     1
+	out
+        ldl     CODELEN                 ;if CODELEN <> 0
+        cj      @L4
+        ldl     LDADDR                  ;send out code to neighbors
+        ldl     TLINK
+        ldl     CODELEN
+        out
+L4:
+        ldlp    LOOPA
+        ldc     L5-L3
+        lend                            ;end loop
+L5:     ldl     CODELEN                 ;if CODELEN <> 0
+        cj      @EXEC
+	ldl     CODELEN                 ;LDADDR:= LDADDR+CODELEN
+        ldl     LDADDR
+        bsub
+        stl     LDADDR
+        j       @L1
+;
+;
+;       execute
+;
+;
+EXEC:   ldc     E2-E1                   ;save return address
+	ldpi
+E1:     ldl     WSPACE
+	stnl    0
+        ldl     WSPACE                  ;adjust to new work space
+        gajw
+        stl     1                       ;save old work space as param
+        ldl     1                       ;load entry point
+        ldnl    ENTRYP
+        gcall                           ;execute
+E2:     ldl     -3                      ;restore work space
+        gajw
+        j       @START
+;
+	.align
+END:    .end

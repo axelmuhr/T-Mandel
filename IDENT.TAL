@@ -1,0 +1,223 @@
+;******************************* IDENT.TAL ********************************
+;  (C) Copyright 1987-1993  Computer System Architects, Provo UT.           *
+;  This  program is the property of Computer System Architects (CSA)        *
+;  and is provided only as an example of a transputer/PC program for        *
+;  use  with CSA's Transputer Education Kit and other transputer products.  *
+;  You may freely distribute copies or modifiy the program as a whole or in *
+;  part, provided you insert in each copy appropriate copyright notices and *
+;  disclaimer of warranty and send to CSA a copy of any modifications which *
+;  you plan to distribute.						    *
+;  This program is provided as is without warranty of any kind. CSA is not  *
+;  responsible for any damages arising out of the use of this program.      *
+;***************************************************************************/
+;****************************************************************************
+; This program  works with FLBOOT.TAL and FLLOAD.TAL. It gives all *
+; transputers an ID by first giving itself an ID and then sending a higher id
+; to it's children. After setting the ID's it collects network info from it's
+; children, adds it on and sends it to it's parent. The network information
+; has three fields.
+; 1. Total number of nodes in the subtree acting this as root. Variable:NNODES
+; 2. If any node has only 2k internal RAM memory, then a special version of
+;    mandelbrot must be loaded.
+; 3. If fixed point or flaoting point mandelbrot needed.
+;***************************************************************************
+	.all
+
+;{{{  constant definition;
+	.val    TRUE,1
+	.val    FALSE,0
+	.val    RESERVE,12
+        .val    T805LO, 0x09     ;IDENT ARE FROM 10 TO 19
+	.val	T805HI, 0x14
+        .val    T800D, 0x60
+        .val    T414B, 0x61
+
+        .val    ID,0
+        .val    MININT,1
+	.val    DBLINK,1
+        .val    MEMSTART,2
+        .val    BOOTIN,3
+        .val    BOOTOUT,4               ;5 and 6 also
+	.val    LDSTART,7
+	.val    ENTRYP,8
+        .val    WSPACE,9
+        .val    LDADDR,10
+        .val    TRANTYPE,11
+
+        .val    TMPID,0
+        .val    TLINK,1
+        .val    LOOPA,2
+	.val    LOOPB,3
+        .val    TO_PARENT,4
+        .val    ONLY_2K,5
+        .val    NNODES,6
+        .val    FIXED_POINT,7
+	.val    TEMP1,8
+        .val    TEMP2,9
+        .val    TEMP3,10
+        .val    STATIC,13
+
+        .val    DFLAG,0
+        .val    LOADING,1
+;}}}  ;
+
+        .pub    START
+START:  ajw     -RESERVE
+;{{{  loop to send id';
+        ldlp    TMPID                   ;input ID
+	ldl     STATIC
+        ldnl    BOOTIN
+        ldc     1
+        in
+        ldlp    TMPID                   ;ID:= TMPID
+        lb
+        ldl     STATIC
+        stnl    ID
+	ldl     TMPID                   ;TMPID:= TMPID BITOR 1
+        ldc     1
+        or
+        stl     TMPID
+        ldc     0                       ;loop i:= 0 for 3 each BOOTOUT link
+	stl     LOOPA
+        ldc     3
+        stl     LOOPB
+L1:     ldl     LOOPA                   ;TLINK:= BOOTOUT[i]
+        ldl     STATIC
+        ldnlp   BOOTOUT
+        wsub
+        ldnl    0
+	stl     TLINK
+        ldl     TLINK                   ;if TLINK <> 0
+        cj      @L2
+	ldlp    TMPID                   ;send ID to child
+        ldl     TLINK
+	ldc     1
+        out
+L2:     ldlp    LOOPA
+        ldc     L3-L1
+        lend                            ;end loop
+L3:     ldc     TRUE
+        stl     DFLAG
+        ldc     TRUE
+	stl     LOADING
+;}}}  ;
+;{{{  get info to send to paren;
+;{{{  are we fixed point;
+        ldl     STATIC
+	ldnl    TRANTYPE
+        eqc     T800D
+
+	ldl     STATIC
+	ldnl    TRANTYPE
+	LDC	T805LO
+	GT
+	CJ	@?5
+;	stl	TEMP1
+	LDC	T805HI
+	ldl	STATIC
+	LDNL	TRANTYPE
+	GT
+	CJ	@?5
+	ldc	1
+?3
+;	eqc     T805
+?5
+	or
+	eqc     0                    ;do a LOGICAL NOT
+	stl     FIXED_POINT
+;}}}  ;
+;{{{  do we have only 2k;
+	;    do initializations
+        ldc     FALSE          ;no for now
+        stl     ONLY_2K
+	mint
+        adc     3000           ; create an address between 2 and 4K
+        stl     TEMP1
+        ldc     0x55555555
+        stl     TEMP2
+        ldc     0xaaaaaaaa
+        stl     TEMP3
+
+	;  try writing 0x55555555 and reading it
+        ldl     TEMP2
+        ldl     TEMP1
+        stnl    0
+        ldl     TEMP1
+	ldnl    0
+        ldl     TEMP2
+        diff
+        eqc     0
+        cj      @P1
+        ;  try writing 0xaaaaaaaa and reading it
+        ldl     TEMP3
+        ldl     TEMP1
+	stnl    0
+        ldl     TEMP1
+        ldnl    0
+        ldl     TEMP3
+        diff
+	eqc     0
+        cj      @P1
+        j       @P2           ;leave ONLY_2K set to FALSE
+P1:     ldc     TRUE
+        stl     ONLY_2K
+P2:
+;}}}  ;
+;{{{  start out assuming we are leaf node;
+	ldc    1
+        stl    NNODES
+;}}}  ;
+;{{{  get results from other branches of tree if they exist;
+        ldc     0                       ;loop i:= 0 for 3 each BOOTOUT link
+	stl     LOOPA
+        ldc     3
+        stl     LOOPB
+N1:     ldl     LOOPA                   ;TLINK:= BOOTOUT[i]
+        ldl     STATIC
+        ldnlp   BOOTOUT
+        wsub
+        ldnl    0
+	stl     TLINK
+        ldl     TLINK                ;if TLINK <> 0
+        cj      @N2
+        ldl     TLINK                ;TLINK := TLINK + 16
+        ldc     16                   ;point to input channel
+	sum
+        stl     TLINK
+        ldlp    TEMP1                ;get ONLY_2K, NNODES and FIXED_POINT
+        ldl     TLINK                ;from child
+        ldc     12
+        in
+        ldl     ONLY_2K              ;collect number of nodes with only 2k RAM
+        ldl     TEMP1
+	sum
+        stl     ONLY_2K
+        ldl     NNODES               ;add node numbers
+        ldl     TEMP2
+        sum
+	stl     NNODES
+        ldl     FIXED_POINT          ;if any use fixed_point all use it
+        ldl     TEMP3
+        or
+        stl     FIXED_POINT
+
+N2:     ldlp    LOOPA
+        ldc     N3-N1
+	lend                            ;end loop
+N3:
+;}}}  ;
+;{{{  send results to root;
+        ldl     STATIC
+	ldnl    BOOTIN
+        ldc     16
+        diff
+        stl     TO_PARENT
+        ldlp    ONLY_2K     ;   send ONLY_2K, NNODES AND FIXED_POINT
+        ldl     TO_PARENT     ;   to parent
+        ldc     12
+        out
+;}}}  ;
+;}}}  ;
+        ajw     RESERVE
+        ret
+        .end

@@ -1,0 +1,265 @@
+;******************************* FLBOOT.TAL ********************************
+;  (C) Copyright 1987-1993  Computer System Architects, Provo UT.           *
+;  This  program is the property of Computer System Architects (CSA)        *
+;  and is provided only as an example of a transputer/PC program for        *
+;  use  with CSA's Transputer Education Kit and other transputer products.  *
+;  You may freely distribute copies or modifiy the program as a whole or in *
+;  part, provided you insert in each copy appropriate copyright notices and *
+;  disclaimer of warranty and send to CSA a copy of any modifications which *
+;  you plan to distribute.						    *
+;  This program is provided as is without warranty of any kind. CSA is not  *
+;  responsible for any damages arising out of the use of this program.      *
+;***************************************************************************/
+;****************************************************************************
+; This program  boots a transputer, does necessary initialization and
+; boots other transputers connected to it with an exact copy of itself. It
+; keeps track of links through which other trnasputers are booted.
+; After booting process, it loads the loader and sends copies of the loader
+; to other transputers connected. Then it starts executing the loader.
+;***************************************************************************
+
+	.t800
+;  val definition;
+
+	.val    RESERVE,16
+	.val    CALLWSP,-4
+	.val    INITIME,0
+	.val    DELAY,16*2
+	.val    T805,  0x0a
+	.val    T800D, 0x60
+	.val    T414B, 0x61
+	.val    LOCTOP,16
+
+	.val    MININT,1
+	.val    MEMSTART,2
+	.val    BOOTIN,3
+	.val    BOOTOUT,4               ;5 and 6 contain links out
+	.val    LDSTART,7               ;zeroed during BOOTOUT save
+	.val    ENTRYP,8
+	.val    WSPACE,9
+	.val    LDADDR,10
+	.val    TRANTYPE,11
+	.val    CODELEN,12              ;high order bytes must stay zeroed
+	.val    BIDX,12
+	.val    LOOPA,13
+	.val    LOOPB,14
+	.val    TLINK,15
+	.val    WSP,15
+
+	.val    OBUFWS,6
+	.val    OLOCAL,3
+	.val    OSTATIC,1
+	.val    OLINK,2
+
+
+	.pub    START
+;       initialization
+
+	.align
+START:  ajw     RESERVE                 ;reserve work space
+	call    0                       ;save registers into workspace
+	ldc     @START - @S1
+	ldpi
+	;ldl     0                       ;return address of call
+	;adc     -3                      ;compute memory start
+S1:     stl     MEMSTART                ;save memory start
+	ldlp    4-RESERVE               ;calc code length
+	ldl     MEMSTART
+	diff
+	stl     CODELEN
+	mint
+	stl     MININT                  ;save MIN INTEGER
+	ldl     MININT                  ;init process front pointers
+	stlf
+	ldl     MININT
+	sthf
+	ldc    T800D                    ;find transtputer type
+	ldc    T414B
+	ldc     0
+	opr    0x17c
+	stl    LOOPA
+	stl    LOOPB
+	ldl    LOOPB
+	cj     @nfp1
+	ldl    LOOPB
+	stl    TRANTYPE
+	j      @nfp2
+nfp1    ldl    LOOPA
+	stl    TRANTYPE
+nfp2
+	testerr                         ;clear error flag
+	clrhalterr                      ;clear halt on error
+	ldl     TRANTYPE                ;clear fpu error flag if T800 or T805
+	eqc     T800D
+	ldl     TRANTYPE
+	eqc     T805
+	or
+	cj      @I1
+	fptesterr
+I1:     ldc     0                       ;init links and event
+	stl     LOOPA
+	ldc     11
+	stl     LOOPB
+I2:     ldl     MININT
+	ldl     LOOPA
+	ldl     MININT
+	wsub
+	stnl    0
+	ldlp    LOOPA
+	ldc     I3-I2
+	lend
+I3:     ldc     INITIME                 ;start timer
+	sttimer
+
+;       bootstrap neighbors
+
+	ldlp    LOCTOP-OLOCAL           ;init new work space ptr
+	stl     WSP
+	ldc     0                       ;loop i:= 0 for 4 each link
+	stl     LOOPA
+	ldc     4
+	stl     LOOPB
+B1:     ldl     LOOPA                   ;if LINKIN[i] <> BOOTIN
+	ldl     MININT
+	ldnlp   4
+	wsub
+	ldl     BOOTIN
+	diff
+	cj      @B3
+	ldl     WSP                     ;alloc OUTBUF work space
+	ldnlp   OBUFWS
+	stl     WSP
+	ldl     LOOPA                   ;save LINKOUT[i]
+	ldl     MININT
+	wsub
+	ldl     WSP
+	stnl    OLINK
+	ldlp    0                       ;save static link
+	ldl     WSP
+	stnl    OSTATIC
+	ldc     OUTBUF-B2               ;save iptr to OUTBUF
+	ldpi
+B2:     ldl     WSP
+	stnl    -1
+	ldl     WSP                     ;load new work space ptr
+	runp                            ;run output buffer at high pri
+B3:     ldlp    LOOPA
+	ldc     B4-B1
+	lend                            ;end loop
+B4:     ldtimer                         ;wait for any com. to finish
+	adc     DELAY
+	tin
+
+;       save BOOTOUT links and reset others except BOOTIN
+
+	ldc     0                       ;BIDX:= 0
+	stl     BIDX
+	ldc     0                       ;loop i:= 0 for 8 each hard link
+	stl     LOOPA
+	ldc     8
+	stl     LOOPB
+R1:     ldl     LOOPA                   ;TLINK:= LINK[i]
+	ldl     MININT
+	wsub
+	stl     TLINK
+	ldc     4                       ;if i < 4
+	ldl     LOOPA
+	gt
+	cj      @R2
+	ldc     0                       ;BOOTOUT[i]:= 0
+	ldl     LOOPA
+	ldlp    BOOTOUT
+	wsub
+	stnl    0
+	ldl     TLINK                   ;if TLINK+4 <> BOOTIN
+	ldnlp   4
+	ldl     BOOTIN
+	diff
+	cj      @R3
+	ldl     TLINK                   ;if *TLINK = MININT
+	ldnl    0
+	ldl     MININT
+	diff
+	eqc     0
+	cj      @R2
+	ldl     TLINK                   ;BOOTOUT[BIDX]:= TLINK
+	ldl     BIDX
+	ldlp    BOOTOUT
+	wsub
+	stnl    0
+	ldl     BIDX                    ;BIDX:= BIDX+1
+	adc     1
+	stl     BIDX
+	j       @R3
+R2:     ldl     TLINK                   ;if TLINK <> BOOTIN
+	ldl     BOOTIN
+        diff
+        cj      @R3
+        ldl     TLINK                   ;resetch(TLINK)
+        resetch
+R3:     ldlp    LOOPA
+        ldc     R4-R1
+        lend                            ;end loop
+R4:
+
+;       loader and executer setup
+
+	ldlp    CODELEN     ;input length of flood loader
+        ldl     BOOTIN
+        ldc     1
+        in
+        ldl     MEMSTART    ;input fload loader
+        ldl     BOOTIN
+        ldl     CODELEN
+        in
+;  send loader to neighbor;
+H2:     ldc     0                       ;loop i:= 0 for 3 each BOOTOUT link
+        stl     LOOPA
+	ldc     3
+	stl     LOOPB
+H3:     ldl     LOOPA                   ;TLINK:= BOOTOUT[i]
+        ldlp    BOOTOUT
+        wsub
+        ldnl    0
+        stl     TLINK
+        ldl     TLINK                   ;if TLINK <> 0
+        cj      @H4
+        ldlp    CODELEN                 ;send out length to neighbors
+        ldl     TLINK
+        ldc     1
+	out
+	ldl     MEMSTART                ;send out code to neighbors
+        ldl     TLINK
+        ldl     CODELEN
+        out
+H4:     ldlp    LOOPA
+        ldc     H5-H3
+        lend                            ;end loop
+H5
+
+        ldlp    LOCTOP                  ;init load start address
+        stl     LDSTART
+	ldl     LDSTART                 ;init entry point
+	stl     ENTRYP
+        ldlp    CALLWSP                 ;init work space
+        stl     WSPACE
+        ldl     MEMSTART                ;go to loader
+        gcall
+
+
+;       output buffer
+
+OUTBUF: ldl     OLINK                   ;load output link
+        ldl     OSTATIC                 ;load code length
+	ldnl    CODELEN
+	outbyte                         ;output code length
+        ldl     OSTATIC                 ;load code start
+        ldnl    MEMSTART
+        ldl     OLINK                   ;load output link
+        ldl     OSTATIC                 ;load code length
+        ldnl    CODELEN
+        out                             ;output code
+        stopp
+
+        .align
+END:    .end

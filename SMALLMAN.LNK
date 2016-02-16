@@ -1,0 +1,5 @@
+FLAG c
+LIST smallman.map
+INPUT smallman.trl mlibs.trl
+ENTRY main
+LIB t8lib.tll

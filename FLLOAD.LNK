@@ -1,0 +1,3 @@
+FLAGS c
+INPUT flload
+ENTRY START
