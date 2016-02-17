@@ -150,7 +150,7 @@ char *argv[];
 
     printf("CSA Mandelzoom Version 2.1 for PC\n");
     printf("(C) Copyright 1988 Computer System Architects Provo, Utah\n");
-    printf("Enhanced by Axel Muhr, 2009, 2015\n");
+    printf("Enhanced by Axel Muhr \(geekdot.com\), 2009, 2015\n");
     printf("This is a free software and you are welcome to redistribute it\n\n");
 
     for (i = 1; i < argc && argv[i][0] == '-'; i++)
@@ -1082,13 +1082,13 @@ void boot_mandel(void)
     if (!load_buf(ident,sizeof(ident))) exit(1);
     if (!tbyte_out(0))
    {
-   printf(" -- timeout sending execute\n");
-   exit(1);
+	   printf(" -- timeout sending execute\n");
+	   exit(1);
    }
     if (!tbyte_out(0))
    {
-   printf(" -- timeout sending id\n");
-   exit(1);
+	   printf(" -- timeout sending id\n");
+	   exit(1);
    }
     if (verbose) printf("Done. Getting data for \"only_2k\",");        
     only_2k = (int)word_in();
@@ -1102,6 +1102,7 @@ void boot_mandel(void)
         fxp ? "fixed" : "floating");
     if (only_2k)
    {
+   if (verbose) printf("Sending 2k mandel-code\n");
    if (!load_buf(smallman,sizeof(smallman))) exit(1);
    if (!tbyte_out(0))
        {
@@ -1111,6 +1112,7 @@ void boot_mandel(void)
    }
     else
    {
+   if (verbose) printf("Sending mandel-code\n");	   
    if (!load_buf(mandel,sizeof(mandel))) exit(1);
    if (!tbyte_out(0))
        {
