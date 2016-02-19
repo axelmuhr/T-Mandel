@@ -274,74 +274,56 @@ char *argv[];
        }
    }
    
-    if (!host)
-   
-   {
-   init_lkio(lb,dc,dc);
-   t_entry(0);         /* we use timer 0 for T-Booting bench */
-   boot_mandel();
-   t_exit(0);
-   scan = scan_tran;
+   if (!host) {
+    init_lkio(lb,dc,dc);
+    t_entry(0);         /* we use timer 0 for T-Booting bench */
+    boot_mandel();
+    t_exit(0);
+    scan = scan_tran;
    }
    
-    if (autz)
-   
-   {
-   if ((fpauto = fopen(AUTOFILE,"r")) == NULL)
-       {
+	if (autz) {
+	 if ((fpauto = fopen(AUTOFILE,"r")) == NULL) {
        printf(" -- can't open file: %s\n",AUTOFILE);
        exit(1);
-       }
-   }
+	 }
+	} else {
+		printf("\nAfter frame is displayed:\n\n");
+		printf("Home - display zoom box, use arrow keys to move & size, ");
+		printf("Home again to zoom\n");
+		printf("Ins  - toggle between size and move zoom box\n");
+		printf("PgUp - reset to outermost frame\n");
+		printf("PgDn - save coord. and iter. to file 'man.dat'\n");
+		printf("End  - quit\n");
+		printf("\n -- Press a key to continue --\n"); 
+		getch();
+	}
    
-    else
-   
-   {
-   printf("\nAfter frame is displayed:\n\n");
-   printf("Home - display zoom box, use arrow keys to move & size, ");
-   printf("Home again to zoom\n");
-   printf("Ins  - toggle between size and move zoom box\n");
-   printf("PgUp - reset to outermost frame\n");
-   printf("PgDn - save coord. and iter. to file 'man.dat'\n");
-   printf("End  - quit\n");
-   }
-   
-   if(!autz) {
-        printf("\n -- Press a key to continue --\n"); 
-        getch();
-   }
     
-   if (color == 0)
-   {
-   hrc_graph_mode();
-   rect = hrc_rect;
-   vect = hrc_vect;
-   screen_w = 720; screen_h = 348;
-   }
-    else if (color == 1)
-   {
-   ibm_mode(4);
-   cga_set_pal(1,1);
-   rect = cga_rect;
-   vect = cga_vect;
-   screen_w = 320; screen_h = 200;
-   }
-    else if (color == 2)
-   {
-   ibm_mode(16);
-   ega_init_pal();
-   rect = ega_rect;
-   vect = ega_vect;
-   screen_w = 640; screen_h = 350;
-   }
-    else if (color == 3)
-   {
-   ibm_mode(18);
-   ega_init_pal();
-   rect = ega_rect;
-   vect = vga_vect;
-   screen_w = 640; screen_h = 480;
-   }
+	if (color == 0) {
+		hrc_graph_mode();
+		rect = hrc_rect;
+		vect = hrc_vect;
+		screen_w = 720; screen_h = 348;
+	} else if (color == 1) {
+		ibm_mode(4);
+		cga_set_pal(1,1);
+		rect = cga_rect;
+		vect = cga_vect;
+		screen_w = 320; screen_h = 200;
+	} else if (color == 2) {
+		ibm_mode(16);
+		ega_init_pal();
+		rect = ega_rect;
+		vect = ega_vect;
+		screen_w = 640; screen_h = 350;
+	} else if (color == 3) {
+		ibm_mode(18);
+		ega_init_pal();
+		rect = ega_rect;
+		vect = vga_vect;
+		screen_w = 640; screen_h = 480;
+	}
     
     clear_scr();
     init_window();
@@ -353,7 +335,7 @@ char *argv[];
     ibm_mode(3);
     if (!color) hrc_text_mode();
     if (autz) {
-   fclose(fpauto);
+	   fclose(fpauto);
    
        t_set_report(NONZERO);                      /* specify report type */
        t_rname("Benchmark results");               /* report title        */
@@ -413,20 +395,20 @@ void auto_loop(void)
     int run = 1;
     
     loop
-   {
-   res = fscanf(fpauto," x:%lf y:%lf range:%lf iter:%d",
-           &center_r,&center_i,&rng,&mxcnt);
-   if (res == EOF) {rewind(fpauto); continue;}
-   if (res != 4) return;   /* End if anything else returned */
-   scale_fac = rng/(esw-1);
-   t_entry(run);           /* start timer */
-   (*scan)();              /* this does the work */
-   t_exit(run);            /* stop timer */
-   run++;
-   if (kbhit()) break;
-   waitsec(ps);
-   if (kbhit()) break;
-       }
+	{
+	   res = fscanf(fpauto," x:%lf y:%lf range:%lf iter:%d",
+			   &center_r,&center_i,&rng,&mxcnt);
+	   if (res == EOF) {rewind(fpauto); continue;}
+	   if (res != 4) return;   /* End if anything else returned */
+	   scale_fac = rng/(esw-1);
+	   t_entry(run);           /* start timer */
+	   (*scan)();              /* this does the work */
+	   t_exit(run);            /* stop timer */
+	   run++;
+	   if (kbhit()) break;
+	   waitsec(ps);
+	   if (kbhit()) break;
+	}
     do getch(); while (kbhit());
 }
 
@@ -436,17 +418,18 @@ void scan_tran(void)
 {
     register int len;
     double xrange,yrange;
-    struct{
-   long com;
-   long width;
-   long height;
-   long maxcnt;
-   double lo_r;
-   double lo_i;
-   double gapx;
-   double gapy;
+	struct{
+	   long com;
+	   long width;
+	   long height;
+	   long maxcnt;
+	   double lo_r;
+	   double lo_i;
+	   double gapx;
+	   double gapy;
     } prob_st;
-    long buf[BUFSIZE];
+    
+	long buf[BUFSIZE];
 
     xrange = scale_fac*(esw-1);
     yrange = scale_fac*(esh-1);
@@ -461,12 +444,12 @@ void scan_tran(void)
     word_out(12L*4);
     chan_out((char *)&prob_st,12*4);
 
-    loop
-   {
-   (*data_in)((char *)buf,len = (int)word_in());
-   if (len == 4) break;
-   (*vect)((int)buf[1],(int)buf[2],len-3*4,(char *)&buf[3]);
-   }
+	loop
+	{
+		(*data_in)((char *)buf,len = (int)word_in());
+		if (len == 4) break;
+		(*vect)((int)buf[1],(int)buf[2],len-3*4,(char *)&buf[3]);
+	}
 }
 
 
@@ -493,17 +476,17 @@ void scan_host(void)
 
     multiple = screen_w/MAXPIX*MAXPIX;
     for (y = 0; y < screen_h; y++) {
-   cy = y*gapy+lo_i;
-   for (x = 0; x < screen_w; x+=MAXPIX) {
+	 cy = y*gapy+lo_i;
+	 for (x = 0; x < screen_w; x+=MAXPIX) {
        pixvec = (x < multiple) ? MAXPIX : screen_w-multiple;
        for (i = 0; i < pixvec; i++) {
-      cx = (x+i)*gapx+lo_r;
-      buf[i] = iterate(cx,cy,maxcnt);
+		cx = (x+i)*gapx+lo_r;
+		buf[i] = iterate(cx,cy,maxcnt);
        }
-       (*vect)(x,y,pixvec,buf);
-       if (kbhit()) return;
-   }
-    }
+	 (*vect)(x,y,pixvec,buf);
+	 if (kbhit()) return;
+	 }
+	}
 }
 
 
@@ -512,22 +495,22 @@ int iterate(cx,cy,maxcnt)
 REAL cx,cy;
 int maxcnt;
 {
-    int cnt;
-    REAL zx,zy,zx2,zy2,tmp,four;
-
-    four = 4.0;
-    zx = zy = zx2 = zy2 = 0.0;
-    cnt = 0;
-    do {
-   tmp = zx2-zy2+cx;
-   zy = zx*zy*2.0+cy;
-   zx = tmp;
-   zx2 = zx*zx;
-   zy2 = zy*zy;
-   cnt++;
-    } while (cnt < maxcnt && zx2+zy2 < four);
-    if (cnt != maxcnt) return(cnt);
-    return(0);
+	int cnt;
+	REAL zx,zy,zx2,zy2,tmp,four;
+	
+	four = 4.0;
+	zx = zy = zx2 = zy2 = 0.0;
+	cnt = 0;
+	do {
+			tmp = zx2-zy2+cx;
+			zy = zx*zy*2.0+cy;
+			zx = tmp;
+			zx2 = zx*zx;
+			zy2 = zy*zy;
+			cnt++;
+	} while (cnt < maxcnt && zx2+zy2 < four);
+	if (cnt != maxcnt) return(cnt);
+	return(0);
 }
 
 
