@@ -1,9 +1,14 @@
 #  MAKEFILE for Mandelbrot program.
 #  Set Borland C compiler and Logical System C compiler path.
 #
-# Heavily altered by Axel Muhr in 2009
+# Heavily altered by Axel Muhr
+# 2009
 # + corrected tlink libs-order to circumvent float error
 # + added make rule for screen2.obj
+#
+# 2009
+# + switched to Borland C++ 3.1
+# + added VESA graphics output for more colors 
 #
 # Caveat: Keep your path to the Borland tools short, else you'll
 #         reach the 128 chars-per-commandline limit quick!
@@ -16,12 +21,14 @@
 
 .SUFFIXES:
 
-.SUFFIXES: .c .tal .tld .arr .exe
+.SUFFIXES: .cpp .c .tal .tld .arr .exe
 
 # change these according to your system. Keep them SHORT!
-BCLIB=C:\dev\bc\lib
-BCINC=c:\dev\bc\include
-BCBIN=c:\dev\bc\bin
+
+BCBIN=c:\dev\bcpp3\bin
+BCLIB=C:\dev\bcpp3\lib
+BCINC=c:\dev\bcpp3\include
+
 LSCBIN=c:\trans\lsc\89\bin
 
 
@@ -44,13 +51,18 @@ LSCBIN=c:\trans\lsc\89\bin
 .tld.arr:
     ltoc  $*
     mkarr $*
+	
+#rule for VBE c++ code
+.cpp.obj:
+	$(BCBIN)\bcc -c -mh -vi -G -O $*.cpp
 
 man:  man.exe
 
 #try:  hostry.exe
 
 man.exe:  man.obj screen2.obj lkio.obj
-  $(BCBIN)\tlink -v  $(BCLIB)\c0s.obj man.obj screen2.obj lkio.obj,man.exe,,tchrts $(BCLIB)\emu $(BCLIB)\maths $(BCLIB)\cs
+  $(BCBIN)\tlink -v  $(BCLIB)\c0s man screen2 lkio,man.exe,,tchrts $(BCLIB)\emu $(BCLIB)\maths $(BCLIB)\cs
+
   del *.bin
   del *.arr
   del *.pp
@@ -64,13 +76,13 @@ man.exe:  man.obj screen2.obj lkio.obj
 
 man.obj:  man.c  sreset.arr flboot.arr flload.arr ident.arr \
 	  mandel.arr smallman.arr
-  $(BCBIN)\bcc -c -v -ms -Fs -w999 -I$(BCINC) man.c
+  $(BCBIN)\bcc -c -ms -Fs -w999 -I$(BCINC) man.c
 
 lkio.obj:    lkio.asm
-   $(LSCBIN)\tasm -zi lkio.asm
+   $(BCBIN)\tasm -zi lkio.asm
 
 screen2.obj:    screen2.asm
-   $(LSCBIN)\tasm -zi screen2.asm
+   $(BCBIN)\tasm -zi screen2.asm
 
 mandel.tal:  mandel.c
 mandel.tld:  mandel.tal mlibp.trl mandel.lnk
