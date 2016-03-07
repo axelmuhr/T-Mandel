@@ -6,7 +6,6 @@
 */
  
 #include <errno.h>
-#include <string.h>
  
 int	optind	= 1;	/* index of which argument is next	*/
 char   *optarg;		/* pointer to argument of current option */
@@ -128,6 +127,6 @@ gopError:
 	optarg = NULL;
 	errno  = EINVAL;
 	if (opterr)
-		perror ("get command line option");
+		perror ("option parameter missing");
 	return ('?');
 }

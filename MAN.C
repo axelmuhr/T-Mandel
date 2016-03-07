@@ -22,6 +22,7 @@
 #include <math.h>
 #include <conio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "lkio.h"
 #include "pchrt.h"
 #include "getopt.h"
@@ -65,6 +66,7 @@
 #define BUFSIZE 20
 #define REAL    double
 #define loop    for (;;)
+#define GRAFOUT(index,value) {outp(0x3Ce,index); outp(0x3Cf,value);}
 
 #define AUTOFILE "man.dat"
 #define PAUSE    3
@@ -75,6 +77,7 @@
 
 typedef unsigned int uint;
 
+void usage(void);
 void com_loop(void);
 void auto_loop(void);
 void scan_tran(void);
@@ -90,30 +93,34 @@ int get_key(void);
 void waitsec(int);
 void draw_box(int,int,int,int);
 void ibm_mode(int);
-void hrc_graph_mode(void);
-void hrc_text_mode(void);
+
 void ega_init_pal(void);
 void ega_set_pal(int,int);
-void cga_set_pal(int,int);
+
 void h_line(int,int,int,int);
 void v_line(int,int,int,int);
 void clear_scr(void);
 void ega_rect(uint,uint,uint,uint,uint);
-void cga_rect(uint,uint,uint,uint,uint);
-void hrc_rect(uint,uint,uint,uint,uint);
+void vesa_rect(uint,uint,uint,uint,uint);
+
 void boot_mandel(void);
 int load_buf(char *, int);
 //extern exit(int); // that's in stdlib these days
 extern getch(void);
 extern kbhit(void);
 extern time(long *);
-extern void hrc_vect();
-extern void cga_vect();
-extern void ega_vect();
+//extern void ega_vect();
 extern void vga_vect();
+void vesa_vect(int, int, int, char *);
 
 void availableModes(void);
-int getVbeInfo();
+void initGraphics(uint);
+int getVbeInfo(void);
+void setVBEMode(int);
+void setPalette332(void);
+void putPixel(int,int,int);
+int getPixel(int,int);
+void line(int ,int ,int ,int ,int);
 
 static autz;
 static verbose;
@@ -152,6 +159,7 @@ struct
     short   TotalMemory;            /* Number of 64kb memory blocks     */
     char    reserved[236];          /* Pad to 256 byte block size       */
 } VbeInfoBlock;
+
 /* SuperVGA mode information block */
 struct
 {
@@ -221,134 +229,81 @@ main(argc,argv)
 int argc;
 char *argv[];
 {
-    int i,aok = 1;
+    int i;
+    int vhex;
     char *s;
+    
+    char c = NULL;
 
-    printf("CSA Mandelzoom Version 2.1 for PC\n");
+    printf("\nCSA Mandelzoom Version 3.0 for PC\n");
     printf("(C) Copyright 1988 Computer System Architects Provo, Utah\n");
-    printf("Enhanced by Axel Muhr \(geekdot.com\), 2009, 2015\n");
+    printf("Enhanced by Axel Muhr \(geekdot.com\), 2009-2016\n");
     printf("This is a free software and you are welcome to redistribute it\n\n");
 
-    for (i = 1; i < argc && argv[i][0] == '-'; i++)
-   {
-   for (s = argv[i]+1; *s != '\0'; s++)
+	while (( c = getopt(argc, argv, "ab:d:i:ptv:x?h")) > 0) {
+		switch (c) {
+			case 'a':   
+			 autz = 1;
+		   /* ps = atoi(optarg);
+		   if ((ps < 0) || (ps > 9)) ps = PAUSE; */
+			 t_request(5);               /* ask for 5 timers */
+       if (t_start() != TRUE)      /* init TCHRT first thing */
        {
-       switch (*s)
-      
-      {
-      case 'a':
-
-          t_request(5);               /* ask for 5 timers */
-          if (t_start() != TRUE)      /* init TCHRT first thing */
-          {
-         printf("Insufficient heap for timers.\n");
-         exit(0);
-          }
-
-          if (sscanf(s+1,"%d",&ps) == 1) s++;
-          if ((ps < 0) || (ps > 9)) ps = PAUSE;
-          autz = 1;
-          break;
-          
-      case 'b':
-          
-          if (i >= argc) {aok = 0; break;}
-          aok &= sscanf(argv[++i],"%i",&lb) == 1 && *(s+1) == '\0';
-          break;
-          
-      case 'c':
-          
-          color = 1;
-          break;
-          
-      case 'd':
-          
-          aok &= sscanf(s+1,"%d",&dc) == 1;
-          if (aok) s++;
-          aok &= (dc >= 1) && (dc <= 3);
-          break;
-          
-      case 'e':
-          
-          color = 2;
-          break;
-          
-      case 'h':
-
-          color = 0;
-          break;
-          
-      case 'i':
-
-          if (i >= argc) {aok = 0; break;}
-          aok &= sscanf(argv[++i],"%i",&mxcnt) == 1 && *(s+1) == '\0';
-          break;
-          
-      case 'p':
-          
-          data_in = dma_in;
-          dc = DMA_CHAN;
-          break;
-          
-      case 't':
-          
-          host = 1;
-          break;
-          
-      case 'v':
-          
-          color = 3;
-          if (i >= argc) {aok = 0; break;}
-          aok &= sscanf(argv[++i],"%i",&vesamode) == 1 && *(s+1) == '\0';
-          break;
-          
-      case 'x':
-          
-          verbose = 1;
-          break;                    
-          
-      default:
-          
-          aok = 0;
-          break;
-          
-      }
-      
+        printf("Insufficient heap for timers.\n");
+        exit(0);
        }
-   }
-    
-   aok &= i == argc;
-   if (!aok)
-   {
-   printf("Usage: man [-b #] [-i #] [-a[#]cd#ehpt]\n");
-   printf("  -a  auto-zoom, coord. from file 'man.dat', # sec. pause\n");
-   printf("  -b  link adaptor base address, # is base (default 0x150)\n");
-   printf("  -c  use cga graphics\n");
-   printf("  -e  use ega graphics\n");
-   printf("  -d  DMA channel, # can be 1-3 (default 1)\n");
-   printf("  -h  use hercules graphics\n");
-   printf("  -i  max. iteration count, # is iter. (default variable)\n");
-   printf("  -p  use program I/O, no DMA (default use DMA)\n");
-   printf("  -t  use host, no transputers (default transputers)\n");
-   printf("  -v  use vga graphics\n");
-   printf("  -x  print verbose messages during initialisation\n");
-   exit(1);
-   }
-   
-   if (color == -1)
-   {
-   printf("h)ercules c)ga e)ga v)ga: ");
-   switch (getchar())
-       {
-       case 'h': 
-       case 'H': color = 0; break;
-       case 'E':
-       case 'e': color = 2; break;
-       case 'V':
-       case 'v': color = 3; break;
-       default:  color = 1; break;
-       }
-   }
+		 
+		   break;
+			
+			case 'b':
+			 lb = atoi(optarg);
+			 break;
+			
+			case 'd':
+			 dc = atoi(optarg);
+			 if((dc < 1) && (dc > 3)) {
+			 	printf("Error: DMA channel has to be 1-3.\n");
+			 	exit(0);
+			 }
+			 break;
+			
+			case 'i':
+			 mxcnt = atoi(optarg);
+			 break;
+			
+			case 'p': 
+			 data_in = dma_in;
+			 dc = DMA_CHAN;
+			 break;
+			
+			case 't':
+			 host = 1;
+			 break;
+			
+			case 'v': 
+			 if (strcmp(optarg, "show")==0) 
+			 {
+			  availableModes();	
+		    exit(1);
+			 } else {
+			 	vhex = (int)strtol(optarg, NULL, 16);
+			 	if(vhex < 0x0100) {
+			 		vesamode = 0x0101;
+			 	} else {
+			  	vesamode = vhex;
+			  }
+			 }
+			 break;
+			
+			case 'x': 
+			 verbose = 1;
+			 break;
+			
+			default:
+			 usage();
+			 break;
+	}
+ }
    
    if (!host) {
     init_lkio(lb,dc,dc);
@@ -375,46 +330,37 @@ char *argv[];
 		getch();
 	}
    
-    
-	if (color == 0) {
-		hrc_graph_mode();
-		rect = hrc_rect;
-		vect = hrc_vect;
-		screen_w = 720; screen_h = 348;
-	} else if (color == 1) {
-		ibm_mode(4);
-		cga_set_pal(1,1);
-		rect = cga_rect;
-		vect = cga_vect;
-		screen_w = 320; screen_h = 200;
-	} else if (color == 2) {
-		ibm_mode(16);
-		ega_init_pal();
-		rect = ega_rect;
-		vect = ega_vect;
-		screen_w = 640; screen_h = 350;
-	} else if (color == 3) {
-		if(vesamode) {
-		 availableModes();	
-		 exit(0);
-		} else {
+	if (!vesamode) {
 		ibm_mode(18);
 		ega_init_pal();
 		rect = ega_rect;
 		vect = vga_vect;
 		screen_w = 640; screen_h = 480;
-		}
-	}
-    
-    clear_scr();
-    init_window();
+
+		clear_scr();
+		init_window(); 
+		
+  } else { 		// VESA
+
+		initGraphics(vesamode);
+		// screen_w = 640; screen_h = 480;
+		setPalette332();
+		
+		vect = vesa_vect;
+		init_window(); 
+  }
 
     if (dc) dma_on();
-    if (autz) auto_loop(); else com_loop();
+    if (autz) {
+    	auto_loop();   /* These are the main calculation loops */
+    } else { 
+    	com_loop();
+    }
+
     if (dc) dma_off();
 
-    ibm_mode(3);
-    if (!color) hrc_text_mode();
+    if (!vesamode) ibm_mode(3); else setVBEMode(oldMode);        // Restore previous mode  
+
     if (autz) {
 	   fclose(fpauto);
    
@@ -432,19 +378,30 @@ char *argv[];
 }
 
 
-
-
 #define ASPECT_R  0.75
 #define MIN_SPAN  2.5
 #define CENTER_R -0.75
 #define CENTER_I  0.0
 
-
-
 int esw,esh;
 double center_r,center_i;
 double prop_fac,scale_fac;
 
+
+void usage(void) 
+{
+   printf("\nUsage: man [/b#] [/i#] [/a[#] v# d# ptx]\n");
+   printf("  /a[#]  auto-zoom, coord. from file 'man.dat', # sec. pause\n");
+   printf("  /b#    link adaptor base address, # is base (default 0x150)\n");
+   printf("  /d#    DMA channel, # can be 1-3 (default 1)\n");
+   printf("  /i#    max. iteration count, # is iter. (default variable)\n");
+   printf("  /p     use program I/O, no DMA (default use DMA)\n");
+   printf("  /t     use host, no transputers (default transputers)\n");
+   printf("  /v#    [mode#|show] use mode # or show available VESA modes (default 0x101)\n");
+   printf("  /x     print verbose messages during initialisation\n");
+   printf("  /h     (or /?) this text\n");
+   exit(1);	
+}
 
 
 void com_loop(void)
@@ -546,7 +503,8 @@ void scan_host(void)
     double gapy;
     REAL cx,cy;
     unsigned char buf[MAXPIX];
-
+    int z;
+	
     xrange = scale_fac*(esw-1);
     yrange = scale_fac*(esh-1);
     maxcnt = calc_iter(xrange);
@@ -554,6 +512,7 @@ void scan_host(void)
     lo_i = center_i - (yrange/2.0);
     gapx = xrange / (screen_w-1);
     gapy = yrange / (screen_h-1);
+    
 
     multiple = screen_w/MAXPIX*MAXPIX;
     for (y = 0; y < screen_h; y++) {
@@ -561,8 +520,8 @@ void scan_host(void)
 	 for (x = 0; x < screen_w; x+=MAXPIX) {
        pixvec = (x < multiple) ? MAXPIX : screen_w-multiple;
        for (i = 0; i < pixvec; i++) {
-		cx = (x+i)*gapx+lo_r;
-		buf[i] = iterate(cx,cy,maxcnt);
+       	cx = (x+i)*gapx+lo_r;
+       	buf[i] = iterate(cx,cy,maxcnt);
        }
 	 (*vect)(x,y,pixvec,buf);
 	 if (kbhit()) return;
@@ -616,8 +575,6 @@ void init_window(void)
     center_r = CENTER_R;
     center_i = CENTER_I;
 }
-
-
 
 
 
@@ -775,16 +732,25 @@ int s;
 void draw_box(x1,y1,x2,y2)
 int x1,y1,x2,y2;
 {
-    int x,y,w,h;
+	if (!vesamode) { 
+		   
+		int x,y,w,h;
 
-    if (x1 < x2) {x = x1; w = x2-x1+1;}
-    else {x = x2; w = x1-x2+1;}
-    if (y1 < y2) {y = y1; h = y2-y1+1;}
-    else {y = y2; h = y1-y2+1;}
-    h_line(x,y1,w,INVTC);
-    h_line(x,y2,w,INVTC);
-    v_line(x1,y,h,INVTC);
-    v_line(x2,y,h,INVTC);
+		if (x1 < x2) {x = x1; w = x2-x1+1;}
+		else {x = x2; w = x1-x2+1;}
+		if (y1 < y2) {y = y1; h = y2-y1+1;}
+		else {y = y2; h = y1-y2+1;}
+
+		h_line(x,y1,w,INVTC);
+		h_line(x,y2,w,INVTC);
+		v_line(x1,y,h,INVTC);
+		v_line(x2,y,h,INVTC);
+	} else {
+  	line(x1,y1,x2,y1,256);
+    line(x1,y2,x2,y2,256);
+    line(x1,y1,x1,y2,256);
+    line(x2,y1,x2,y2,256);
+  }
 }
 
 
@@ -799,72 +765,23 @@ int m;
 
 
 
-void hrc_graph_mode(void)
-{
-    hrc_rect(0,0,348,720,0);
-    outp(0x3bf,3);
-    outp(0x3b8,0x0a);
-    outp(0x3b4,0); outp(0x3b5,53);
-    outp(0x3b4,1); outp(0x3b5,45);
-    outp(0x3b4,2); outp(0x3b5,46);
-    outp(0x3b4,3); outp(0x3b5,6);
-    outp(0x3b4,4); outp(0x3b5,91);
-    outp(0x3b4,5); outp(0x3b5,2);
-    outp(0x3b4,6); outp(0x3b5,87);
-    outp(0x3b4,7); outp(0x3b5,87);
-    outp(0x3b4,8); outp(0x3b5,2);
-    outp(0x3b4,9); outp(0x3b5,3);
-    outp(0x3b4,10); outp(0x3b5,0);
-    outp(0x3b4,11); outp(0x3b5,0);
-    outp(0x3b4,12); outp(0x3b5,0);
-    outp(0x3b4,13); outp(0x3b5,0);
-    outp(0x3b4,14); outp(0x3b5,0);
-    outp(0x3b4,15); outp(0x3b5,0);
-}
-
-
-
-void hrc_text_mode(void)
-{
-    outp(0x3bf,0);
-    outp(0x3b8,0x28);
-    outp(0x3b4,0); outp(0x3b5,95);
-    outp(0x3b4,1); outp(0x3b5,80);
-    outp(0x3b4,2); outp(0x3b5,82);
-    outp(0x3b4,3); outp(0x3b5,11);
-    outp(0x3b4,4); outp(0x3b5,25);
-    outp(0x3b4,5); outp(0x3b5,3);
-    outp(0x3b4,6); outp(0x3b5,25);
-    outp(0x3b4,7); outp(0x3b5,25);
-    outp(0x3b4,8); outp(0x3b5,2);
-    outp(0x3b4,9); outp(0x3b5,13);
-    outp(0x3b4,10); outp(0x3b5,13);
-    outp(0x3b4,11); outp(0x3b5,13);
-    outp(0x3b4,12); outp(0x3b5,0);
-    outp(0x3b4,13); outp(0x3b5,0);
-    outp(0x3b4,14); outp(0x3b5,0);
-    outp(0x3b4,15); outp(0x3b5,0);
-}
-
-
-
 void ega_init_pal(void)
 {
     ega_set_pal( 0,000);
     ega_set_pal( 1,004);
-    ega_set_pal( 2,044); /* red */
+    ega_set_pal( 2,044); // red 
     ega_set_pal( 3,064);
     ega_set_pal( 4,046);
-    ega_set_pal( 5,066); /* yellow */
+    ega_set_pal( 5,066); // yellow 
     ega_set_pal( 6,026);
-    ega_set_pal( 7,022); /* green */
+    ega_set_pal( 7,022); // green 
     ega_set_pal( 8,023);
-    ega_set_pal( 9,033); /* cyan */
+    ega_set_pal( 9,033); // cyan 
     ega_set_pal(10,013);
     ega_set_pal(11,031);
-    ega_set_pal(12,011); /* blue */
+    ega_set_pal(12,011); // blue 
     ega_set_pal(13,015);
-    ega_set_pal(14,075); /* magenta */
+    ega_set_pal(14,075); // magenta 
     ega_set_pal(15,077);
 }
 
@@ -877,17 +794,6 @@ int idx,color;
     regs.h.al = 0;
     regs.h.bl = idx;
     regs.h.bh = color;
-    int86(0x10,&regs,&regs);
-}
-
-
-
-void cga_set_pal(id,val)
-int id,val;
-{
-    regs.h.ah = 11;
-    regs.h.bh = id;
-    regs.h.bl = val;
     int86(0x10,&regs,&regs);
 }
 
@@ -925,8 +831,7 @@ void clear_scr(void)
 #define MAXROWS 350
 #define MAXCOLS 640
 #define COLBYTES MAXCOLS/8
-#define GRAFOUT(index,value) {outp(0x3Ce,index); outp(0x3Cf,value);}
-
+// #define GRAFOUT(index,value) {outp(0x3Ce,index); outp(0x3Cf,value);}
 
 
 void ega_rect(r1,c1,r2,c2,color)
@@ -939,14 +844,14 @@ unsigned int r1,c1,r2,c2,color;
     char rmask  = ~(0xff >> (c2 & 7));
     register row,col;
 
-    if (color & 0x80) GRAFOUT(3,0x18)
+    if (color & 0x80) GRAFOUT(3,0x18) // XOR if 8th bit set
     else GRAFOUT(3,0)
     if (numcols < 0) {
    lmask &= rmask;
    rmask = numcols = 0;
     }
-    GRAFOUT(0,color);
-    GRAFOUT(1,0x0f);
+    GRAFOUT(0,color); // Set Register
+    GRAFOUT(1,0x0f);  // Enable Set/Reset Register
     for (row = 0; row < numrows; row++) {
    GRAFOUT(8,lmask);
    *(addr++) &= 1;
@@ -963,83 +868,22 @@ unsigned int r1,c1,r2,c2,color;
 
 
 
-void cga_rect(r1,c1,r2,c2,color)
-unsigned int r1,c1,r2,c2,color;
-{
-    char far *base = (char far*) (0xb8000000L + (c1 >> 2));
-    char far *addr;
-    int numcols = (c2 >> 2) - (c1 >> 2) - 1;
-    char lmask  =   0xff >> ((c1 & 3)*2);
-    char rmask  = ~(0xff >> ((c2 & 3)*2));
-    int c;
-    register row,col;
-
-    if (numcols < 0) {
-   lmask &= rmask;
-   rmask = numcols = 0;
-    }
-    if (color & 0x80) {
-   for (row = r1; row < r2; row++) {
-       addr = base + (0x2000 * (row & 1)) + (80 * (row >> 1));
-       *(addr++) ^= lmask;
-       for (col = 0; col < numcols; col++) *(addr++) ^= 0xff;
-       *(addr++) ^= rmask;
-   }
-    } else {
-   c = ((color & 3) * 0x55);
-   for (row = r1; row < r2; row++) {
-       addr = base + (0x2000 * (row & 1)) + (80 * (row >> 1));
-       *addr = *addr & ~lmask | c & lmask; addr++;
-       for (col = 0; col < numcols; col++) *(addr++) = c;
-       *addr = *addr & ~rmask | c & rmask;
-   }
-    }
-}
-
-
-
-void hrc_rect(r1,c1,r2,c2,color)
-unsigned int r1,c1,r2,c2,color;
-{
-    char far *base = (char far*) (0xb0000000L + (c1 >> 3));
-    char far *addr;
-    int numcols = (c2 >> 3) - (c1 >> 3) - 1;
-    char lmask  =   0xff >> (c1 & 7);
-    char rmask  = ~(0xff >> (c2 & 7));
-    int c;
-    register row,col;
-
-    if (numcols < 0) {
-   lmask &= rmask;
-   rmask = numcols = 0;
-    }
-    if (color & 0x80) {
-   for (row = r1; row < r2; row++) {
-       addr = base + (0x2000 * (row & 3)) + (90 * (row >> 2));
-       *(addr++) ^= lmask;
-       for (col = 0; col < numcols; col++) *(addr++) ^= 0xff;
-       *(addr++) ^= rmask;
-   }
-    } else {
-   c = ((color & 1) * 0xff);
-   for (row = r1; row < r2; row++) {
-       addr = base + (0x2000 * (row & 3)) + (90 * (row >> 2));
-       *addr = *addr & ~lmask | c & lmask; addr++;
-       for (col = 0; col < numcols; col++) *(addr++) = c;
-       *addr = *addr & ~rmask | c & rmask;
-   }
-    }
-}
-
 /*
 
 		VESA graphics routines
 
 */
 
+void vesa_vect(int x, int y, int w, char *line) {
+
+int i;
+	for (i=0; i < w; i++) {
+ 	 putPixel(x+i, y, line[i]);
+	}
+}
 /*------------------------ VBE Interface Functions ------------------------*/
 /* Get SuperVGA information, returning true if VBE found */
-int getVbeInfo()
+int getVbeInfo(void)
 {
     union REGS in,out;
     struct SREGS segs;
@@ -1050,6 +894,7 @@ int getVbeInfo()
     int86x(0x10, &in, &out, &segs);
     return (out.x.ax == 0x4F);
 }
+
 /* Get video mode information given a VBE mode number. We return 0 if the mode
  * is not available, or if it is not a 256 color packed pixel mode. */
 int getModeInfo(int mode)
@@ -1109,7 +954,7 @@ void setBank(int bank)
 #endif
 }
 /*-------------------------- Application Functions ------------------------*/
-void vgaSetPalette(unsigned int start, unsigned int count, vgaColor *p)
+void vgaSetPalette( int start,  int count, vgaColor *p)
 {
     int i;
 
@@ -1130,7 +975,7 @@ void vgaSetPalette(unsigned int start, unsigned int count, vgaColor *p)
     }
 }
 
-void setPalette332()
+void setPalette332(void)
 {
     unsigned int r, g, b, c;
     vgaColor p[256];
@@ -1138,7 +983,7 @@ void setPalette332()
     c = 0;
     for (r = 0; r <= 64; r += 9)
     {
-        for (g = 0; g <= 64; g += 9)
+        for (g = 0; g <= 64; g += 13)
         {
             for (b = 0; b < 64; b += 21)
             {
@@ -1149,7 +994,11 @@ void setPalette332()
             }
         }
     }
-
+    
+		p[255].red = 63;
+		p[255].green = 63;
+		p[255].blue = 63;
+		
     vgaSetPalette(0, 256, p);
 }
 
@@ -1161,6 +1010,14 @@ void putPixel(int x,int y,int color)
     *(screenPtr + (addr & 0xFFFF)) = (char)color;
 }
 
+// AM: Just in case we need it for XOR'ing
+int getPixel(int x,int y)
+{
+    long addr = (long)y * bytesperline + x;
+    setBank((int)(addr >> 16));
+    return *(screenPtr + (addr & 0xFFFF));
+}
+
 /* Draw a line from (x1,y1) to (x2,y2) in specified color */
 void line(int x1,int y1,int x2,int y2,int color)
 {
@@ -1170,8 +1027,17 @@ void line(int x1,int y1,int x2,int y2,int color)
     int     yincr;                  /* Increment for y values           */
     int     t;                      /* Counters etc.                    */
 #define ABS(a)   ((a) >= 0 ? (a) : -(a))
+	
     dx = ABS(x2 - x1);
     dy = ABS(y2 - y1);
+    
+		if (color > 255) { 
+			GRAFOUT(3,0x18);	// XOR if 9th bit set
+			color = 255;   	 
+		} else {
+			GRAFOUT(3,0);
+		}
+		
     if (dy <= dx)
     {
         /* We have a line with a slope between -1 and 1. Ensure that we are 
@@ -1189,6 +1055,7 @@ void line(int x1,int y1,int x2,int y2,int color)
         d = 2*dy - dx;              /* Initial decision variable value  */
         Eincr = 2*dy;               /* Increment to move to E pixel     */
         NEincr = 2*(dy - dx);       /* Increment to move to NE pixel    */
+
         putPixel(x1,y1,color);      /* Draw the first point at (x1,y1)  */
         /* Incrementally determine the positions of the remaining pixels */
         for (x1++; x1 <= x2; x1++)
@@ -1273,19 +1140,18 @@ void availableModes(void)
     {
         if (getModeInfo(*p))
         {
-            printf("    %4d x %4d %d bits per pixel\n",
-                ModeInfoBlock.XResolution, ModeInfoBlock.YResolution,
+            printf("0x%04X : %4d by %4d (%dbpp)\n",
+                *p, ModeInfoBlock.XResolution, ModeInfoBlock.YResolution,
                 ModeInfoBlock.BitsPerPixel);
         }
     }
-    printf("\nUsage: hellovbe <xres> <yres>\n");
     exit(1);
 }
 /* Initialize the specified video mode. Notice how we determine a shift factor
  * for adjusting the Window granularity for bank switching. This is much faster
  * than doing it with a multiply (especially with direct banking enabled). */
  
-void initGraphics(unsigned int x, unsigned int y)
+void initGraphics(uint mode) //(unsigned int x, unsigned int y)
 {
     unsigned far    *p;
     if (!getVbeInfo())
@@ -1295,10 +1161,12 @@ void initGraphics(unsigned int x, unsigned int y)
     }
     for (p = VbeInfoBlock.VideoModePtr; *p != (unsigned)-1; p++)
     {
-        if (getModeInfo(*p) && ModeInfoBlock.XResolution == x
-                && ModeInfoBlock.YResolution == y)
+        //if (getModeInfo(*p) && ModeInfoBlock.XResolution == x && ModeInfoBlock.YResolution == y)
+        if (getModeInfo(*p) && *p == mode)
         {
-           xres = x;   yres = y;
+           //xres = x;   yres = y;
+           screen_w = ModeInfoBlock.XResolution; 
+           screen_h = ModeInfoBlock.YResolution;
            bytesperline = ModeInfoBlock.BytesPerScanLine;
            bankShift = 0;
            while ((unsigned)(64 >> bankShift) != ModeInfoBlock.WinGranularity)
@@ -1361,6 +1229,10 @@ void boot_mandel(void)
     only_2k = (int)word_in();
     if (verbose) printf("\"num_nodes\",");
     nnodes  = (int)word_in();
+    if (nnodes <= 0) {
+    	printf("\nNo Transputer nodes found, exiting. Try /t for executing on host instead.\n");
+    	exit(1);	
+    }
     if (verbose) printf("\"fpx\",");
     fxp     = (int)word_in();
     printf("\nnodes found: %d",nnodes);
