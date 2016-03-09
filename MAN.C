@@ -881,6 +881,7 @@ int i;
  	 putPixel(x+i, y, line[i]);
 	}
 }
+
 /*------------------------ VBE Interface Functions ------------------------*/
 /* Get SuperVGA information, returning true if VBE found */
 int getVbeInfo(void)
@@ -916,6 +917,7 @@ int getModeInfo(int mode)
         return 1;
     return 0;
 }
+
 /* Set a VBE video mode */
 void setVBEMode(int mode)
 {
@@ -923,6 +925,7 @@ void setVBEMode(int mode)
     in.x.ax = 0x4F02; in.x.bx = mode;
     int86(0x10,&in,&out);
 }
+
 /* Return the current VBE video mode */
 int getVBEMode(void)
 {
@@ -931,6 +934,7 @@ int getVBEMode(void)
     int86(0x10,&in,&out);
     return out.x.bx;
 }
+
 /* Set new read/write bank. Set both Window A and Window B, as many VBE's have
  * these set as separately available read and write windows. We also use a 
  * simple (but very effective) optimization of checking if the requested bank 
@@ -953,6 +957,7 @@ void setBank(int bank)
     int86(0x10, &in, &out);
 #endif
 }
+
 /*-------------------------- Application Functions ------------------------*/
 void vgaSetPalette( int start,  int count, vgaColor *p)
 {
@@ -1032,10 +1037,10 @@ void line(int x1,int y1,int x2,int y2,int color)
     dy = ABS(y2 - y1);
     
 		if (color > 255) { 
-			GRAFOUT(3,0x18);	// XOR if 9th bit set
-			color = 255;   	 
+			color = 255;
+/*			GRAFOUT(3,0x18);	// XOR if 9th bit set
 		} else {
-			GRAFOUT(3,0);
+			GRAFOUT(3,0); */
 		}
 		
     if (dy <= dx)
