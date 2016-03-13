@@ -20,8 +20,7 @@ This Version was pushed to the 3.0 level, as the graphics output was *heavily* a
 * The /v switch enables VESA VBE graphics. '/vshow' displays all available 8bit (256 color) modes, default is 640x480/256
 
 That said, **VBE support is still unfinished** :disappointed:, the rubberband does not properly use XOR drawing, so it sucks (please help fixing in function line()) . 
-Worst of all, while running ok'ish in i.e. Virtualbox, the keyboard control gives a *lot* of beeping on a real PC...
-which is strange, as I didn't touch any of those functions.
+
 
 Beyond this, there are still all other mods from 2.x, like
 * a high-precision timer, mainly used for benchmarking
