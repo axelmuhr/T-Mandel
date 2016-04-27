@@ -16,12 +16,13 @@ Enhancements
 This Version was pushed to the 3.0 level, as the graphics output was *heavily* altered:
 + intro'd `optarg` to replace the oldschool argv parsing 
 * CGA, Hercules and EGA support were removed from the code
-* VGA 640x480/16 is now standard
-* The /v switch enables VESA VBE graphics. '/vshow' displays all available 8bit (256 color) modes, default is 640x480/256
+* VGA 640x480/16 is now standard (using 3rd party BGI libraries)
 
-That said, **VBE support is still unfinished** :disappointed:, the rubberband does not properly use XOR drawing, so it sucks (please help fixing in function line()) . 
-Worst of all, while running ok'ish in i.e. Virtualbox, the keyboard control gives a *lot* of beeping on a real PC...
-which is strange, as I didn't touch any of those functions.
+There are two 256 color BGI drives available & provided:
+* SVGA.BGI - by Ullrich von Bassewitz, 256 only, supports all BGI functions
+* SVGA265.BGI - by Jordan Hargraphix Software, offers even higher color drivers, a bit faster but does not cleanly support eg. writemode() needed for the rubberband selector.
+		              
+So I went for the cleaner Bassewitz driver. To change the driver simply comment/uncomment the installuserdriver("SVGA265"..) line in the man.c source
 
 Beyond this, there are still all other mods from 2.x, like
 * a high-precision timer, mainly used for benchmarking

@@ -1,0 +1,892 @@
+;	Compiled by TCX V89.1 (PC->Transputer)
+	.ALL
+	.EMULATE
+	.REL
+	.MOD	0
+ .T800
+ .NOEMULATE
+	.PUB	main
+main
+	.VAL	?ws,22
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-22
+	LDL	?ws+1
+	LDNL	+2
+	STL	?ws-3
+	.LDC	main
+	ADC	-80
+	STL	?ws-2
+	.LDC	main
+	STL	?ws-1
+	.LDC	main
+	ADC	+80
+	STL	?ws-19
+	CALL	@ChanAlloc
+	STL	?ws-13
+	CALL	@ChanAlloc
+	STL	?ws-18
+	CALL	@ChanAlloc
+	STL	?ws-8
+	.VAL	?ws,?ws+4
+	.VAL	?tb,?tb+4
+	.VAL	?sb,?sb+4
+	AJW	-4
+	LDL	?ws-8
+	STL	+3
+	LDL	?ws-18
+	STL	+2
+	LDL	?ws-13
+	STL	+1
+	.LDC	+3
+	STL	0
+	.LDC	+160
+	.LDC	job
+	.LDC	jobws
+	CALL	@PSetup
+	.VAL	?ws,?ws-4
+	.VAL	?tb,?tb-4
+	.VAL	?sb,?sb-4
+	AJW	+4
+	.LDC	+1
+	OR
+	RUNP
+	LDL	?ws+1
+	LDNL	0
+	CJ	@?3
+	LDL	?ws+1
+	LDNL	+3
+	STL	?ws-20
+	J	@?2
+?3
+	CALL	@ChanAlloc
+	STL	?ws-20
+	.VAL	?ws,?ws+3
+	.VAL	?tb,?tb+3
+	.VAL	?sb,?sb+3
+	AJW	-3
+	LDL	?ws-20
+	STL	+2
+	LDL	?ws+1
+	LDNL	+3
+	STL	+1
+	.LDC	+3
+	STL	0
+	.LDC	+96
+	.LDC	feed
+	.LDC	fedws
+	CALL	@PSetup
+	.VAL	?ws,?ws-3
+	.VAL	?tb,?tb-3
+	.VAL	?sb,?sb-3
+	AJW	+3
+	RUNP
+?2
+	.LDC	0
+	STL	?ws-21
+?6
+	.LDC	+3
+	LDL	?ws-21
+	GT
+	CJ	@?7
+	LDL	?ws+1
+	ADC	+16
+	LDL	?ws-21
+	BCNT
+	ADD
+	LDNL	0
+?7
+	CJ	@?5
+	CALL	@ChanAlloc
+	LDLP	?ws-13
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STNL	0
+	CALL	@ChanAlloc
+	LDLP	?ws-18
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STNL	0
+	LDL	?ws+1
+	ADC	+16
+	LDL	?ws-21
+	BCNT
+	ADD
+	LDNL	0
+	ADC	+16
+	LDLP	?ws-8
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STNL	0
+	.VAL	?ws,?ws+4
+	.VAL	?tb,?tb+4
+	.VAL	?sb,?sb+4
+	AJW	-4
+	LDL	?ws+1
+	ADC	+16
+	LDL	?ws-21
+	BCNT
+	ADD
+	LDNL	0
+	STL	+3
+	LDLP	?ws-18
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	LDNL	0
+	STL	+2
+	LDLP	?ws-13
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	LDNL	0
+	STL	+1
+	.LDC	+3
+	STL	0
+	.LDC	+80
+	LDLP	?ws-3
+	LDL	?ws-21
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	buffer
+	REV
+	CALL	@PSetup
+	.VAL	?ws,?ws-4
+	.VAL	?tb,?tb-4
+	.VAL	?sb,?sb-4
+	AJW	+4
+	RUNP
+?4
+	LDL	?ws-21
+	ADC	+1
+	STL	?ws-21
+	J	@?6
+?5
+	LDLP	?ws-18
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STL	?tb
+	.LDC	0
+	LDLP	?ws-8
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STNL	0
+	.LDC	0
+	LDL	?tb
+	STNL	0
+	LDL	?tb
+	LDNL	0
+	LDLP	?ws-13
+	LDL	?ws-21
+	ADC	+1
+	BCNT
+	ADD
+	STNL	0
+	.VAL	?ws,?ws+4
+	.VAL	?tb,?tb+4
+	.VAL	?sb,?sb+4
+	AJW	-4
+	LDLP	?ws-18
+	STL	+3
+	LDLP	?ws-13
+	STL	+2
+	LDL	?ws-20
+	STL	+1
+	.LDC	+3
+	STL	0
+	.LDC	+116
+	.LDC	selector
+	.LDC	selws
+	CALL	@PSetup
+	.VAL	?ws,?ws-4
+	.VAL	?tb,?tb-4
+	.VAL	?sb,?sb-4
+	AJW	+4
+	RUNP
+	.VAL	?ws,?ws+3
+	.VAL	?tb,?tb+3
+	.VAL	?sb,?sb+3
+	AJW	-3
+	LDL	?ws+1
+	LDNL	+3
+	ADC	-16
+	STL	+2
+	LDLP	?ws-8
+	STL	+1
+	.LDC	+2
+	STL	0
+	.LDC	+152
+	.LDC	arbiter
+	LDL	?ws-19
+	CALL	@PSetup
+	.VAL	?ws,?ws-3
+	.VAL	?tb,?tb-3
+	.VAL	?sb,?sb-3
+	AJW	+3
+	RUNP
+	STOPP
+	.RETF	?ws
+	.ALIGN
+	.PUB	jobws
+jobws
+	.DS	+160
+	.PUB	job
+job
+	.VAL	?ws,40
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-40
+	LDLP	?ws-16
+	STL	?ws-20
+?10
+	.LDC	0
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+1
+	.LDC	+4
+	OUT
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	IN
+	LDL	?tb
+	STL	?ws-35
+	LDLP	?ws-19
+	LDL	?ws+2
+	LDL	?ws-35
+	IN
+	LDL	?ws-19
+	EQC	0
+	CJ	@?22
+	LDL	?ws-16
+	STL	?ws-34
+	LDL	?ws-31
+	CJ	@?17
+	LDL	?ws-29
+?17
+	CJ	@?19
+	LDL	?ws-29
+	LDL	?ws-17
+	PROD
+	LDL	?ws-30
+	ADD
+	STL	?ws-38
+	.LDC	0
+	STL	?ws-36
+?13
+	LDL	?ws-34
+	LDL	?ws-36
+	GT
+	CJ	@?12
+	LDL	?ws-18
+	LDL	?ws-36
+	ADD
+	LDL	?ws-31
+	PROD
+	LDL	?ws-32
+	ADD
+	STL	?ws-39
+	LDL	?ws-33
+	LDL	?ws-38
+	LDL	?ws-39
+	CALL	@iterFIX
+	LDL	?ws-20
+	LDL	?ws-36
+	ADD
+	SB
+?11
+	LDL	?ws-36
+	ADC	+1
+	STL	?ws-36
+	J	@?13
+?12
+	J	@?18
+?19
+	.LDC	0
+	STL	?ws-36
+?16
+	LDL	?ws-34
+	LDL	?ws-36
+	GT
+	CJ	@?15
+	.LDC	+1
+	LDL	?ws-20
+	LDL	?ws-36
+	ADD
+	SB
+?14
+	LDL	?ws-36
+	ADC	+1
+	STL	?ws-36
+	J	@?16
+?15
+?18
+	LDL	?ws-34
+	ADC	+12
+	STL	?ws-35
+	.LDC	+3
+	STL	?ws-19
+	J	@?21
+?22
+	LDL	?ws-19
+	EQC	+2
+	CJ	@?20
+	LDL	?ws-17
+	STL	?ws-33
+	LDLP	?ws-16
+	CALL	@fix
+	STL	?ws-32
+	LDLP	?ws-14
+	CALL	@fix
+	STL	?ws-30
+	LDLP	?ws-12
+	CALL	@fix
+	STL	?ws-31
+	LDLP	?ws-10
+	CALL	@fix
+	STL	?ws-29
+	J	@?8
+?20
+?21
+	LDL	?ws-35
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+3
+	.LDC	+4
+	OUT
+	LDLP	?ws-19
+	LDL	?ws+3
+	LDL	?ws-35
+	OUT
+?8
+	J	@?10
+?9
+	.RETF	?ws
+	.PUB	iterFIX
+iterFIX
+	.VAL	?ws,6
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-6
+ .VAL maxcnt, ?ws+3
+ .VAL cy, ?ws+2
+ .VAL cx, ?ws+1
+ .VAL tmp, ?ws-1
+ .VAL zy2, ?ws-2
+ .VAL zx2, ?ws-3
+ .VAL zy, ?ws-4
+ .VAL zx, ?ws-5
+ .VAL cnt, ?ws-6
+ ; zx = zy = zx2 = zy2 = cnt = 0;
+ LDC 0
+ STL zx
+ LDC 0
+ STL zy
+ LDC 0
+ STL zx2
+ LDC 0
+ STL zy2
+ LDC 0
+ STL cnt
+LOOP:
+ ; cnt++;
+ LDL cnt
+ ADC 1
+ STL cnt
+ ; if (cnt >= maxcnt) goto END;
+ LDL maxcnt
+ LDL cnt
+ GT
+ CJ @END
+ ; tmp = zx2 - zy2 + cx;
+ LDL zx2
+ LDL zy2
+ SUB
+ LDL cx
+ ADD
+ STL tmp
+ ; zy = zx * zy * 2 + cy;
+ LDL zx
+ LDL zy
+ FMUL
+ XDBLE
+ LDC 3
+ LSHL
+ CSNGL
+ LDL cy
+ ADD
+ STL zy
+ ; tmp = zx;
+ LDL tmp
+ STL zx
+ ; zx2 = zx * zx;
+ LDL zx
+ LDL zx
+ FMUL
+ XDBLE
+ LDC 2
+ LSHL
+ CSNGL
+ STL zx2
+ ; zy2 = zy * zy;
+ LDL zy
+ LDL zy
+ FMUL
+ XDBLE
+ LDC 2
+ LSHL
+ CSNGL
+ STL zy2
+ ; if (zx2 + zy2 >= 4.0) goto END;
+ LDL zx2
+ LDL zy2
+ ADD
+ TESTERR
+ CJ @END
+ J @LOOP
+END:
+ ; if (cnt != maxcnt) return(cnt);
+ LDL cnt
+ LDL maxcnt
+ DIFF
+ CJ @RETN
+ LDL cnt
+ .RETF ?ws
+RETN:
+ ; return(0);
+ .RETF ?ws
+	.RETF	?ws
+	.PUB	fix
+fix
+	.VAL	?ws,2
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-2
+ .VAL x,?ws+1
+ .VAL tmp,?ws-1
+ .VAL e,?ws-2
+ ; e = ((x[1] >> 20) & 0x7ff) - 1023 + 9;
+ LDL x
+ LDNL 1
+ .LDC 20
+ SHR
+ .LDC 0x7ff
+ AND
+ ADC (-1023)+(+9)
+ STL e
+ ; reg = (x[1] & 0xfffff) | 0x100000;
+ LDL x
+ LDNL 1
+ .LDC 0xfffff
+ AND
+ .LDC 0x100000
+ OR
+ ; if (e < 0) { F2;
+ .LDC 0
+ LDL e
+ GT
+ CJ @F2
+ ; if (e > -21) { F1;
+ LDL e
+ .LDC -21
+ GT
+ CJ @F1
+ ; reg >>= -e;
+ LDL e
+ NOT
+ ADC 1
+ SHR
+F1:
+ ; } else reg = 0;
+ .LDC 0
+ CJ @F4
+F2:
+ ; } else if (e < 11) { F3;
+ ADD
+ .LDC +11
+ LDL e
+ GT
+ CJ @F3
+ ; lreg <<= e;
+ LDL x
+ LDNL 0
+ LDL e
+ LSHL
+ STL tmp
+ .LDC 0
+ CJ @F4
+F3:
+ ; } else reg = 0x7fffffff;
+ .LDC 0x7fffffff
+ .LDC 0
+F4:
+ ; if (x[1] < 0) return(-reg);
+ LDL x
+ LDNL 1
+ GT
+ CJ @F5
+ NOT
+ ADC 1
+ .RETF ?ws
+F5:
+ ; return(reg);
+ ADD
+ .RETF ?ws
+	.RETF	?ws
+	.PUB	buffer
+buffer
+	.VAL	?ws,13
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-13
+?25
+	.LDC	0
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+1
+	.LDC	+4
+	OUT
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	IN
+	LDL	?tb
+	STL	?ws-12
+	LDLP	?ws-11
+	LDL	?ws+2
+	LDL	?ws-12
+	IN
+	LDL	?ws-12
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+3
+	.LDC	+4
+	OUT
+	LDLP	?ws-11
+	LDL	?ws+3
+	LDL	?ws-12
+	OUT
+?23
+	J	@?25
+?24
+	.RETF	?ws
+	.PUB	arbiter
+arbiter
+	.VAL	?ws,24
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-24
+	.LDC	0
+	STL	?ws-20
+	.LDC	0
+	STL	?ws-21
+?28
+	LDL	?ws-20
+	LDL	?ws+1
+	CALL	@ProcPriAltList
+	STL	?ws-23
+	LDL	?ws+1
+	LDL	?ws-20
+	ADC	+1
+	BCNT
+	ADD
+	LDNL	0
+	CJ	@?29
+	LDL	?ws-20
+	ADC	+1
+	.LDC	0
+	CJ	@?30
+?29
+	.LDC	0
+?30
+	ADD
+	STL	?ws-20
+	LDLP	?tb
+	LDL	?ws+1
+	LDL	?ws-23
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	+4
+	IN
+	LDL	?tb
+	STL	?ws-22
+	LDLP	?ws-19
+	LDL	?ws+1
+	LDL	?ws-23
+	BCNT
+	ADD
+	LDNL	0
+	LDL	?ws-22
+	IN
+	LDL	?ws-19
+	EQC	+4
+	CJ	@?33
+	LDL	?ws+1
+	LDL	?ws-21
+	ADC	+1
+	STL	?ws-21
+	LDL	?ws-21
+	BCNT
+	ADD
+	LDNL	0
+	CJ	@?32
+	J	@?26
+	J	@?31
+?32
+	.LDC	0
+	STL	?ws-21
+?31
+?33
+	LDL	?ws-22
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	OUT
+	LDLP	?ws-19
+	LDL	?ws+2
+	LDL	?ws-22
+	OUT
+?26
+	J	@?28
+?27
+	.RETF	?ws
+	.ALIGN
+	.PUB	selws
+selws
+	.DS	+116
+	.PUB	selector
+selector
+	.VAL	?ws,14
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-14
+?36
+	LDLP	?tb
+	LDL	?ws+1
+	.LDC	+4
+	IN
+	LDL	?tb
+	STL	?ws-12
+	LDLP	?ws-11
+	LDL	?ws+1
+	LDL	?ws-12
+	IN
+	LDL	?ws-11
+	EQC	0
+	CJ	@?41
+	.LDC	0
+	LDL	?ws+2
+	CALL	@ProcPriAltList
+	STL	?ws-13
+	LDLP	?tb
+	LDL	?ws+2
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	+4
+	IN
+	LDL	?tb
+	LDL	?ws-12
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+3
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	+4
+	OUT
+	LDLP	?ws-11
+	LDL	?ws+3
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	LDL	?ws-12
+	OUT
+	J	@?40
+?41
+	.LDC	0
+	STL	?ws-13
+?39
+	LDL	?ws+2
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	CJ	@?38
+	LDLP	?tb
+	LDL	?ws+2
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	+4
+	IN
+	LDL	?tb
+	LDL	?ws-12
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+3
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	.LDC	+4
+	OUT
+	LDLP	?ws-11
+	LDL	?ws+3
+	LDL	?ws-13
+	BCNT
+	ADD
+	LDNL	0
+	LDL	?ws-12
+	OUT
+?37
+	LDL	?ws-13
+	ADC	+1
+	STL	?ws-13
+	J	@?39
+?38
+?40
+?34
+	J	@?36
+?35
+	.RETF	?ws
+	.ALIGN
+	.PUB	fedws
+fedws
+	.DS	+96
+	.PUB	feed
+feed
+	.VAL	?ws,17
+	.VAL	?tb,0
+	.VAL	?sb,0
+	AJW	-17
+?44
+	LDLP	?tb
+	LDL	?ws+1
+	.LDC	+4
+	IN
+	LDL	?tb
+	STL	?ws-13
+	LDLP	?ws-12
+	LDL	?ws+1
+	LDL	?ws-13
+	IN
+	LDL	?ws-12
+	EQC	+1
+	CJ	@?53
+	LDL	?ws-11
+	STL	?ws-16
+	LDL	?ws-10
+	STL	?ws-15
+	.LDC	+2
+	STL	?ws-11
+	.LDC	+44
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	OUT
+	LDLP	?ws-11
+	LDL	?ws+2
+	.LDC	+44
+	OUT
+	.LDC	0
+	STL	?ws-12
+	LDL	?ws-16
+	.LDC	+64
+	DIV
+	.LDC	+64
+	PROD
+	STL	?ws-14
+	.LDC	0
+	STL	?ws-10
+?47
+	LDL	?ws-15
+	LDL	?ws-10
+	GT
+	CJ	@?46
+	.LDC	0
+	STL	?ws-11
+?50
+	LDL	?ws-16
+	LDL	?ws-11
+	GT
+	CJ	@?49
+	LDL	?ws-14
+	LDL	?ws-11
+	GT
+	CJ	@?51
+	.LDC	+64
+	.LDC	0
+	CJ	@?52
+?51
+	LDL	?ws-16
+	LDL	?ws-14
+	SUB
+?52
+	ADD
+	STL	?ws-9
+	.LDC	+16
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	OUT
+	LDLP	?ws-12
+	LDL	?ws+2
+	.LDC	+16
+	OUT
+?48
+	LDL	?ws-11
+	ADC	+64
+	STL	?ws-11
+	J	@?50
+?49
+?45
+	LDL	?ws-10
+	ADC	+1
+	STL	?ws-10
+	J	@?47
+?46
+	.LDC	+4
+	STL	?ws-12
+	.LDC	+4
+	STL	?ws-13
+?53
+	LDL	?ws-13
+	STL	?tb
+	LDLP	?tb
+	LDL	?ws+2
+	.LDC	+4
+	OUT
+	LDLP	?ws-12
+	LDL	?ws+2
+	LDL	?ws-13
+	OUT
+?42
+	J	@?44
+?43
+	.RETF	?ws
+	.EXT	PSetup
+	.EXT	ChanAlloc
+	.EXT	ProcPriAltList
+	.END

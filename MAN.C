@@ -23,10 +23,13 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <graphics.h>
+
 #include "lkio.h"
 #include "pchrt.h"
 #include "getopt.h"
-
+#include "svgautil.h"
+#include "svga256.h"
 
 #define TRUE  1
 #define FALSE 0
@@ -101,26 +104,18 @@ void h_line(int,int,int,int);
 void v_line(int,int,int,int);
 void clear_scr(void);
 void ega_rect(uint,uint,uint,uint,uint);
-void vesa_rect(uint,uint,uint,uint,uint);
 
 void boot_mandel(void);
 int load_buf(char *, int);
-//extern exit(int); // that's in stdlib these days
 extern getch(void);
 extern kbhit(void);
 extern time(long *);
-//extern void ega_vect();
 extern void vga_vect();
-void vesa_vect(int, int, int, char *);
+void bgi_vect(int, int, int, char *);
+void setPalette(void);
+long WhitePixel(void);
+int huge DetectVGA256(void);
 
-void availableModes(void);
-void initGraphics(uint);
-int getVbeInfo(void);
-void setVBEMode(int);
-void setPalette332(void);
-void putPixel(int,int,int);
-int getPixel(int,int);
-void line(int ,int ,int ,int ,int);
 
 static autz;
 static verbose;
@@ -147,82 +142,6 @@ static D[2][2] = {
     {3,1}
 };
 
-/*---------------------- VESA Macro and type definitions -----------------------*/
-/* SuperVGA information block */
-struct
-{
-    char    VESASignature[4];       /* 'VESA' 4 byte signature          */
-    short   VESAVersion;            /* VBE version number               */
-    char    far *OEMStringPtr;      /* Pointer to OEM string            */
-    long    Capabilities;           /* Capabilities of video card       */
-    unsigned far *VideoModePtr;     /* Pointer to supported modes       */
-    short   TotalMemory;            /* Number of 64kb memory blocks     */
-    char    reserved[236];          /* Pad to 256 byte block size       */
-} VbeInfoBlock;
-
-/* SuperVGA mode information block */
-struct
-{
-    unsigned short ModeAttributes;      /* Mode attributes                 */
-    unsigned char  WinAAttributes;      /* Window A attributes             */
-    unsigned char  WinBAttributes;      /* Window B attributes             */
-    unsigned short WinGranularity;      /* Window granularity in k         */
-    unsigned short WinSize;             /* Window size in k                */
-    unsigned short WinASegment;         /* Window A segment                */
-    unsigned short WinBSegment;         /* Window B segment                */
-    void (far *WinFuncPtr)(void);       /* Pointer to window function      */
-    unsigned short BytesPerScanLine;    /* Bytes per scanline              */
-    unsigned short XResolution;         /* Horizontal resolution           */
-    unsigned short YResolution;         /* Vertical resolution             */
-    unsigned char  XCharSize;           /* Character cell width            */
-    unsigned char  YCharSize;           /* Character cell height           */
-    unsigned char  NumberOfPlanes;      /* Number of memory planes         */
-    unsigned char  BitsPerPixel;        /* Bits per pixel                  */
-    unsigned char  NumberOfBanks;       /* Number of CGA style banks       */
-    unsigned char  MemoryModel;         /* Memory model type               */
-    unsigned char  BankSize;            /* Size of CGA style banks         */
-    unsigned char  NumberOfImagePages;  /* Number of images pages          */
-    unsigned char  res1;                /* Reserved                        */
-    unsigned char  RedMaskSize;         /* Size of direct color red mask   */
-    unsigned char  RedFieldPosition;    /* Bit posn of lsb of red mask     */
-    unsigned char  GreenMaskSize;       /* Size of direct color green mask */
-    unsigned char  GreenFieldPosition;  /* Bit posn of lsb of green mask   */
-    unsigned char  BlueMaskSize;        /* Size of direct color blue mask  */
-    unsigned char  BlueFieldPosition;   /* Bit posn of lsb of blue mask    */
-    unsigned char  RsvdMaskSize;        /* Size of direct color res mask   */
-    unsigned char  RsvdFieldPosition;   /* Bit posn of lsb of res mask     */
-    unsigned char  DirectColorModeInfo; /* Direct color mode attributes    */
-    unsigned char  res2[216];           /* Pad to 256 byte block size      */
-} ModeInfoBlock;
-typedef enum
-{
-    memPL       = 3,                /* Planar memory model              */
-    memPK       = 4,                /* Packed pixel memory model        */
-    memRGB      = 6,                /* Direct color RGB memory model    */
-    memYUV      = 7,                /* Direct color YUV memory model    */
-} memModels;
-
-typedef struct
-{
-    unsigned int red;
-    unsigned int green;
-    unsigned int blue;
-} vgaColor;
-
-/*--------------------------- VESA Global Variables ----------------------------*/
-char mystr[256];
-char *get_str();
-int     xres,yres;                  /* Resolution of video mode used    */
-int     bytesperline;               /* Logical CRT scanline length      */
-int     curBank;                    /* Current read/write bank          */
-unsigned int bankShift;             /* Bank granularity adjust factor   */
-int     oldMode;                    /* Old video mode number            */
-char    far *screenPtr;             /* Pointer to start of video memory */
-void    (far *bankSwitch)(void);    /* Direct bank switching function   */
-
-#define PAL_WRITE_ADDR (0x3c8)      // palette write address
-#define PAL_READ_ADDR  (0x3c7)      // palette write address
-#define PAL_DATA       (0x3c9)      // palette data register
 
 
 main(argc,argv)
@@ -230,8 +149,10 @@ int argc;
 char *argv[];
 {
     int i;
-    int vhex;
+    int vcolors;
     char *s;
+    int  Gd = DETECT, Gm;
+    char GrErr;
     
     char c = NULL;
 
@@ -280,17 +201,17 @@ char *argv[];
 			 host = 1;
 			 break;
 			
-			case 'v': 
+			case 'v': // UPDATE this!
 			 if (strcmp(optarg, "show")==0) 
 			 {
-			  availableModes();	
+			  // TODO: show availableModes();	
 		    exit(1);
 			 } else {
-			 	vhex = (int)strtol(optarg, NULL, 16);
-			 	if(vhex < 0x0100) {
-			 		vesamode = 0x0101;
+			 	vcolors = atoi(optarg); //(int)strtol(optarg, NULL, 16);
+			 	if(vcolors <= 8) {
+			 		vesamode = 2; // 8 bit/256 colors
 			 	} else {
-			  	vesamode = vhex;
+			  	vesamode = 2; // This is going to be 15/16/24 bit
 			  }
 			 }
 			 break;
@@ -307,9 +228,9 @@ char *argv[];
    
    if (!host) {
     init_lkio(lb,dc,dc);
-    t_entry(0);         /* we use timer 0 for T-Booting bench */
+    if (autz) t_entry(0);         /* we use timer 0 for T-Booting bench */
     boot_mandel();
-    t_exit(0);
+    if (autz) t_exit(0);
     scan = scan_tran;
    }
    
@@ -340,15 +261,40 @@ char *argv[];
 		clear_scr();
 		init_window(); 
 		
-  } else { 		// VESA
+  } else { 		// VESA/BGI
 
-		initGraphics(vesamode);
-		// screen_w = 640; screen_h = 480;
-		setPalette332();
+		/*
+		There are two 256 color BGI drives available/provided:
+		SVGA.BGI - by Ullrich von Bassewitz, 256 only, supports all BGI functions
+		SVGA265.BGI - by Jordan Hargraphix Software, offers even higher color drivers, 
+		              a bit faster but does not cleanly support eg. writemode() needed 
+		              for the rubberband selector.
+		              
+		So I went for the cleaner solution. To change the driver simply use the
+		uncomment installuserdriver("SVGA265"..) line and comment the 2 lines above.
+		*/
 		
-		vect = vesa_vect;
+		Gd = installuserdriver("SVGA", NULL); 
+		Gm = 3;
+		// Gd = installuserdriver("SVGA265", DetectVGA256);
+		
+		initgraph(&Gd,&Gm,""); 
+		
+  /* Test if mode was initialized successfully */
+		GrErr = graphresult();
+		if (GrErr != grOk) {
+		 printf("Graphics error: %s\n",grapherrormsg(GrErr));
+		 exit(1);
+		}
+		cleardevice();
+		setPalette();
+		
+		screen_w = getmaxx(); 
+		screen_h = getmaxy();
+		
+		vect = bgi_vect;
 		init_window(); 
-  }
+	}
 
     if (dc) dma_on();
     if (autz) {
@@ -359,7 +305,7 @@ char *argv[];
 
     if (dc) dma_off();
 
-    if (!vesamode) ibm_mode(3); else setVBEMode(oldMode);        // Restore previous mode  
+    if (!vesamode) ibm_mode(3); else closegraph();        // Restore previous mode  
 
     if (autz) {
 	   fclose(fpauto);
@@ -374,6 +320,7 @@ char *argv[];
        t_report(0);              /* do report - (0) goes to CRT */
        t_stop();                 /* shut down TCHRT and free heap */
   }
+
   return(0);
 }
 
@@ -397,7 +344,7 @@ void usage(void)
    printf("  /i#    max. iteration count, # is iter. (default variable)\n");
    printf("  /p     use program I/O, no DMA (default use DMA)\n");
    printf("  /t     use host, no transputers (default transputers)\n");
-   printf("  /v#    [mode#|show] use mode # or show available VESA modes (default 0x101)\n");
+   printf("  /v#    [mode#|show] use mode # or show available BGI modes (default 0x101)\n");
    printf("  /x     print verbose messages during initialisation\n");
    printf("  /h     (or /?) this text\n");
    exit(1);	
@@ -617,80 +564,107 @@ int *esc;
 void region(bx,by,lx,ly,esc)
 int *bx,*by,*lx,*ly,*esc;
 {
-    int c,tmp,dx,dy,jmp,boxw,boxh,insert;
+	int c,tmp,dx,dy,jmp,boxw,boxh,insert;
 
-    insert = 0;
-    jmp = 1;
-    boxw = screen_w/10;
-    boxh = screen_h/10;
-    *esc = FALSE;
-    *bx = ((screen_w - boxw)/2);
-    *by = ((screen_h - boxh)/2);
-    *lx = *bx + (boxw-1);
-    *ly = *by + (boxh-1);
-    draw_box(*bx,*by,*lx,*ly);
-    do {
-   c = get_key()+insert;
-   if (counts() < 5) jmp++; else jmp = 1;
-   draw_box(*bx,*by,*lx,*ly);
-   switch (c) {
-   case LARW:
-       tmp = (*bx >= jmp) ? jmp : *bx;
-       *bx -= tmp; *lx -= tmp;
-       break;
-   case RARW:
-       tmp = (*lx+jmp < screen_w) ? jmp : (screen_w-1) - *lx;
-       *bx += tmp; *lx += tmp;
-       break;
-   case UARW:
-       tmp = (*ly+jmp < screen_h) ? jmp : (screen_h-1) - *ly;
-       *by += tmp; *ly += tmp;
-       break;
-   case DARW:
-       tmp = (*by >= jmp) ? jmp : *by;
-       *by -= tmp; *ly -= tmp;
-       break;
-   case LARW+INSM:
-   case DARW+INSM:
-       tmp = *lx-*bx;
-       dx = (tmp > jmp) ? tmp-jmp : 1;
-       dy = (double)screen_h / (double)screen_w * (double)dx;
-       *bx += (tmp>>1)-(dx>>1); *lx = *bx+dx;
-       *by += ((*ly-*by)>>1)-(dy>>1); *ly = *by+dy;
-       break;
-   case RARW+INSM:
-   case UARW+INSM:
-       tmp = *lx-*bx;
-       dx = (tmp+jmp < screen_w) ? tmp+jmp : screen_w-1;
-       dy = (double)screen_h / (double)screen_w * (double)dx;
-       *bx += (tmp>>1)-(dx>>1); *lx = *bx+dx;
-       *by += ((*ly-*by)>>1)-(dy>>1); *ly = *by+dy;
-       if (*bx < 0) {
-      *lx -= *bx; *bx = 0;
-       } else if (*lx >= screen_w) {
-      *bx -= *lx-(screen_w-1); *lx = screen_w-1;
-       }
-       if (*by < 0) {
-      *ly -= *by; *by = 0;
-       } else if (*ly >= screen_h) {
-      *by -= *ly-(screen_h-1); *ly = screen_h-1;
-       }
-       break;
-   case INS:
-   case INS+INSM:
-       insert ^= INSM;
-       break;
-   case ESC:
-   case ESC+INSM:
-       *esc = TRUE;
-       break;
-   }
-   draw_box(*bx,*by,*lx,*ly);
-    } while ((c & (INSM-1)) != HOME && !*esc);
-    draw_box(*bx,*by,*lx,*ly);
+	insert = 0;
+	jmp = 1;
+	boxw = screen_w/10;
+	boxh = screen_h/10;
+	*esc = FALSE;
+	*bx = ((screen_w - boxw)/2);
+	*by = ((screen_h - boxh)/2);
+	*lx = *bx + (boxw-1);
+	*ly = *by + (boxh-1);
+	draw_box(*bx,*by,*lx,*ly);
+	do {
+		c = get_key()+insert;
+		draw_box(*bx,*by,*lx,*ly);
+		if (counts() < 5) jmp++; else jmp = 1;
+		// 
+		switch (c) {
+		case LARW:
+		    tmp = (*bx >= jmp) ? jmp : *bx;
+		    *bx -= tmp; *lx -= tmp;
+		    break;
+		case RARW:
+		    tmp = (*lx+jmp < screen_w) ? jmp : (screen_w-1) - *lx;
+		    *bx += tmp; *lx += tmp;
+		    break;
+		case UARW:
+		    tmp = (*ly+jmp < screen_h) ? jmp : (screen_h-1) - *ly;
+		    *by += tmp; *ly += tmp;
+		    break;
+		case DARW:
+		    tmp = (*by >= jmp) ? jmp : *by;
+		    *by -= tmp; *ly -= tmp;
+		    break;
+		case LARW+INSM:
+		case DARW+INSM:
+		    tmp = *lx-*bx;
+		    dx = (tmp > jmp) ? tmp-jmp : 1;
+		    dy = (double)screen_h / (double)screen_w * (double)dx;
+		    *bx += (tmp>>1)-(dx>>1); *lx = *bx+dx;
+		    *by += ((*ly-*by)>>1)-(dy>>1); *ly = *by+dy;
+		    break;
+		case RARW+INSM:
+		case UARW+INSM:
+		    tmp = *lx-*bx;
+		    dx = (tmp+jmp < screen_w) ? tmp+jmp : screen_w-1;
+		    dy = (double)screen_h / (double)screen_w * (double)dx;
+		    *bx += (tmp>>1)-(dx>>1); *lx = *bx+dx;
+		    *by += ((*ly-*by)>>1)-(dy>>1); *ly = *by+dy;
+		    if (*bx < 0) {
+		   *lx -= *bx; *bx = 0;
+		    } else if (*lx >= screen_w) {
+		   *bx -= *lx-(screen_w-1); *lx = screen_w-1;
+		    }
+		    if (*by < 0) {
+		   *ly -= *by; *by = 0;
+		    } else if (*ly >= screen_h) {
+		   *by -= *ly-(screen_h-1); *ly = screen_h-1;
+		    }
+		    break;
+		case INS:
+		case INS+INSM:
+		    insert ^= INSM;
+		    break;
+		case ESC:
+		case ESC+INSM:
+		    *esc = TRUE;
+		    break;
+		}
+		draw_box(*bx,*by,*lx,*ly);
+	} while ((c & (INSM-1)) != HOME && !*esc);
+	
+	draw_box(*bx,*by,*lx,*ly);
 }
 
+#define INVTC 0x8f
 
+void draw_box(x1,y1,x2,y2)
+int x1,y1,x2,y2;
+{
+	if (!vesamode) { 
+		   
+		int x,y,w,h;
+
+		if (x1 < x2) {x = x1; w = x2-x1+1;}
+		else {x = x2; w = x1-x2+1;}
+		if (y1 < y2) {y = y1; h = y2-y1+1;}
+		else {y = y2; h = y1-y2+1;}
+
+		h_line(x,y1,w,INVTC);
+		h_line(x,y2,w,INVTC);
+		v_line(x1,y,h,INVTC);
+		v_line(x2,y,h,INVTC);
+	} else {
+		// setcolor(RealDrawColor(WhitePixel()));
+		setcolor(WHITE);
+		setwritemode(XOR_PUT); 
+		rectangle(x1, y1, x2, y2);
+		setwritemode(COPY_PUT); 
+  }
+}
 
 
 int counts(void)
@@ -723,34 +697,6 @@ int s;
 
     time(&start);
     do time(&now); while ((now-start) < s);
-}
-
-
-
-#define INVTC 0x8f
-
-void draw_box(x1,y1,x2,y2)
-int x1,y1,x2,y2;
-{
-	if (!vesamode) { 
-		   
-		int x,y,w,h;
-
-		if (x1 < x2) {x = x1; w = x2-x1+1;}
-		else {x = x2; w = x1-x2+1;}
-		if (y1 < y2) {y = y1; h = y2-y1+1;}
-		else {y = y2; h = y1-y2+1;}
-
-		h_line(x,y1,w,INVTC);
-		h_line(x,y2,w,INVTC);
-		v_line(x1,y,h,INVTC);
-		v_line(x2,y,h,INVTC);
-	} else {
-  	line(x1,y1,x2,y1,256);
-    line(x1,y2,x2,y2,256);
-    line(x1,y1,x1,y2,256);
-    line(x2,y1,x2,y2,256);
-  }
 }
 
 
@@ -831,7 +777,6 @@ void clear_scr(void)
 #define MAXROWS 350
 #define MAXCOLS 640
 #define COLBYTES MAXCOLS/8
-// #define GRAFOUT(index,value) {outp(0x3Ce,index); outp(0x3Cf,value);}
 
 
 void ega_rect(r1,c1,r2,c2,color)
@@ -870,323 +815,63 @@ unsigned int r1,c1,r2,c2,color;
 
 /*
 
-		VESA graphics routines
+		BGI graphics routines
 
 */
 
-void vesa_vect(int x, int y, int w, char *line) {
+
+void bgi_vect(int x, int y, int w, char *line) {
 
 int i;
 	for (i=0; i < w; i++) {
- 	 putPixel(x+i, y, line[i]);
+ 	 putpixel(x+i, y, line[i]);
 	}
 }
 
-/*------------------------ VBE Interface Functions ------------------------*/
-/* Get SuperVGA information, returning true if VBE found */
-int getVbeInfo(void)
+
+int huge DetectVGA256(void)
 {
-    union REGS in,out;
-    struct SREGS segs;
-    char far *VbeInfo = (char far *)&VbeInfoBlock;
-    in.x.ax = 0x4F00;
-    in.x.di = FP_OFF(VbeInfo);
-    segs.es = FP_SEG(VbeInfo);
-    int86x(0x10, &in, &out, &segs);
-    return (out.x.ax == 0x4F);
+  int Vid;
+
+  printf("Which video mode would you like to use? \n");
+  printf("  0) 320x200x256\n");
+  printf("  1) 640x400x256\n");
+  printf("  2) 640x480x256\n");
+  printf("  3) 800x600x256\n");
+  printf("  4) 1024x768x256\n");
+  printf("  5) 640x480x256\n");
+  printf("  6) 1280x1024x256\n");
+  printf("\n> ");
+  scanf("%d",&Vid);
+  return Vid;
 }
 
-/* Get video mode information given a VBE mode number. We return 0 if the mode
- * is not available, or if it is not a 256 color packed pixel mode. */
-int getModeInfo(int mode)
+long WhitePixel(void)
 {
-    union REGS in,out;
-    struct SREGS segs;
-    char far *modeInfo = (char far *)&ModeInfoBlock;
-    if (mode < 0x100) return 0;     /* Ignore non-VBE modes             */
-    in.x.ax = 0x4F01;
-    in.x.cx = mode;
-    in.x.di = FP_OFF(modeInfo);
-    segs.es = FP_SEG(modeInfo);
-    int86x(0x10, &in, &out, &segs);
-    if (out.x.ax != 0x4F) return 0;
-    if ((ModeInfoBlock.ModeAttributes & 0x1)
-            && ModeInfoBlock.MemoryModel == memPK
-            && ModeInfoBlock.BitsPerPixel == 8
-            && ModeInfoBlock.NumberOfPlanes == 1)
-        return 1;
-    return 0;
-}
-
-/* Set a VBE video mode */
-void setVBEMode(int mode)
-{
-    union REGS in,out;
-    in.x.ax = 0x4F02; in.x.bx = mode;
-    int86(0x10,&in,&out);
-}
-
-/* Return the current VBE video mode */
-int getVBEMode(void)
-{
-    union REGS in,out;
-    in.x.ax = 0x4F03;
-    int86(0x10,&in,&out);
-    return out.x.bx;
-}
-
-/* Set new read/write bank. Set both Window A and Window B, as many VBE's have
- * these set as separately available read and write windows. We also use a 
- * simple (but very effective) optimization of checking if the requested bank 
- * is currently active. */
-void setBank(int bank)
-{
-    union REGS  in,out;
-    if (bank == curBank) return;    /* Bank is already active           */
-    curBank = bank;                 /* Save current bank number         */
-    bank <<= bankShift;             /* Adjust to window granularity     */
-#ifdef  DIRECT_BANKING
-    setbxdx(0,bank);
-    bankSwitch();
-    setbxdx(1,bank);
-    bankSwitch();
-#else
-    in.x.ax = 0x4F05; in.x.bx = 0;  in.x.dx = bank;
-    int86(0x10, &in, &out);
-    in.x.ax = 0x4F05; in.x.bx = 1;  in.x.dx = bank;
-    int86(0x10, &in, &out);
-#endif
+  switch(getmaxcolor()) {
+    case 32768: return 0x7fffL;
+    case 65535: return 0xffffL;
+    case 16777: return 0xffffffL;
+    default   : return 15;
+  };
 }
 
 /*-------------------------- Application Functions ------------------------*/
-void vgaSetPalette( int start,  int count, vgaColor *p)
+
+
+
+ void setPalette(void)
 {
-    int i;
+  int c;
+  
+  for (c = 0; c < 256; c++)
+    setrgbpalette (c, 0, c, 50 + 2 * c);
+  
+  setrgbpalette (256, 0, 0, 0); // the Mandelbrot set is black 
+  //setrgbpalette (255, 255, 255, 255);
+} 
 
-    if (start < 0 || (start + count - 1) > 255)
-    {
-        return;
-    }
 
-    while(!(inp(0x3da) & 0x08));    // wait vertical retrace
-
-    outp(PAL_WRITE_ADDR, start);
-    for (i = 0; i < count; i++)
-    {
-        outp(PAL_DATA, p->red);
-        outp(PAL_DATA, p->green);
-        outp(PAL_DATA, p->blue);
-        p++;
-    }
-}
-
-void setPalette332(void)
-{
-    unsigned int r, g, b, c;
-    vgaColor p[256];
-
-    c = 0;
-    for (r = 0; r <= 64; r += 9)
-    {
-        for (g = 0; g <= 64; g += 13)
-        {
-            for (b = 0; b < 64; b += 21)
-            {
-                p[c].red = r;
-                p[c].green = g;
-                p[c].blue = b;
-                c++;
-            }
-        }
-    }
-    
-		p[255].red = 63;
-		p[255].green = 63;
-		p[255].blue = 63;
-		
-    vgaSetPalette(0, 256, p);
-}
-
-/* Plot a pixel at location (x,y) in specified color (8 bit modes only) */
-void putPixel(int x,int y,int color)
-{
-    long addr = (long)y * bytesperline + x;
-    setBank((int)(addr >> 16));
-    *(screenPtr + (addr & 0xFFFF)) = (char)color;
-}
-
-// AM: Just in case we need it for XOR'ing
-int getPixel(int x,int y)
-{
-    long addr = (long)y * bytesperline + x;
-    setBank((int)(addr >> 16));
-    return *(screenPtr + (addr & 0xFFFF));
-}
-
-/* Draw a line from (x1,y1) to (x2,y2) in specified color */
-void line(int x1,int y1,int x2,int y2,int color)
-{
-    int     d;                      /* Decision variable                */
-    int     dx,dy;                  /* Dx and Dy values for the line    */
-    int     Eincr,NEincr;           /* Decision variable increments     */
-    int     yincr;                  /* Increment for y values           */
-    int     t;                      /* Counters etc.                    */
-#define ABS(a)   ((a) >= 0 ? (a) : -(a))
-	
-    dx = ABS(x2 - x1);
-    dy = ABS(y2 - y1);
-    
-		if (color > 255) { 
-			color = 255;
-/*			GRAFOUT(3,0x18);	// XOR if 9th bit set
-		} else {
-			GRAFOUT(3,0); */
-		}
-		
-    if (dy <= dx)
-    {
-        /* We have a line with a slope between -1 and 1. Ensure that we are 
-         * always scan converting the line from left to right to ensure that 
-         * we produce the same line from P1 to P0 as the line from P0 to P1. */
-        if (x2 < x1)
-        {
-            t = x2; x2 = x1; x1 = t;    /* Swap X coordinates           */
-            t = y2; y2 = y1; y1 = t;    /* Swap Y coordinates           */
-        }
-        if (y2 > y1)
-            yincr = 1;
-        else
-            yincr = -1;
-        d = 2*dy - dx;              /* Initial decision variable value  */
-        Eincr = 2*dy;               /* Increment to move to E pixel     */
-        NEincr = 2*(dy - dx);       /* Increment to move to NE pixel    */
-
-        putPixel(x1,y1,color);      /* Draw the first point at (x1,y1)  */
-        /* Incrementally determine the positions of the remaining pixels */
-        for (x1++; x1 <= x2; x1++)
-
-        {
-            if (d < 0)
-                d += Eincr;         /* Choose the Eastern Pixel         */
-            else
-            {
-                d += NEincr;        /* Choose the North Eastern Pixel   */
-                y1 += yincr;        /* (or SE pixel for dx/dy < 0!)     */
-            }
-            putPixel(x1,y1,color);  /* Draw the point                   */
-        }
-    }
-    else
-    {
-        /* We have a line with a slope between -1 and 1 (ie: includes vertical
-         * lines). We must swap x and y coordinates for this. Ensure that we
-         * are always scan converting the line from left to right to ensure 
-         * that we produce the same line from P1 to P0 as line from P0 to P1.*/
-        if (y2 < y1)
-        {
-            t = x2; x2 = x1; x1 = t;    /* Swap X coordinates           */
-            t = y2; y2 = y1; y1 = t;    /* Swap Y coordinates           */
-        }
-        if (x2 > x1)
-            yincr = 1;
-        else
-            yincr = -1;
-        d = 2*dx - dy;              /* Initial decision variable value  */
-        Eincr = 2*dx;               /* Increment to move to E pixel     */
-        NEincr = 2*(dx - dy);       /* Increment to move to NE pixel    */
-        putPixel(x1,y1,color);      /* Draw the first point at (x1,y1)  */
-        /* Incrementally determine the positions of the remaining pixels */
-        for (y1++; y1 <= y2; y1++)
-        {
-            if (d < 0)
-                d += Eincr;         /* Choose the Eastern Pixel         */
-            else
-            {
-                d += NEincr;        /* Choose the North Eastern Pixel   */
-                x1 += yincr;        /* (or SE pixel for dx/dy < 0!)     */
-            }
-            putPixel(x1,y1,color);  /* Draw the point                   */
-        }
-    }
-}
-
-/* Return NEAR pointer to FAR string pointer*/
-char *get_str(char far *p)
-{
-    int i;
-    char *q=mystr;
-    for(i=0;i<255;i++)
-    {
-       if(*p) *q++ = *p++;
-       else break;
-    }
-    *q = '\0';
-    return(mystr);
-}
-/* Display a list of available resolutions. Be careful with calls to function
- * 00h to get SuperVGA mode information. Many VBE's build the list of video
- * modes directly in this information block, so if you are using a common 
- * buffer (which we aren't here, but in protected mode you will), then you will
- * need to make a local copy of this list of available modes. */
- 
-void availableModes(void)
-{
-    unsigned far    *p;
-    if (!getVbeInfo())
-    {
-        printf("No VESA VBE detected\n");
-        exit(1);
-    }
-    printf("VESA VBE Version %d.%d detected (%s)\n\n",
-        VbeInfoBlock.VESAVersion >> 8, VbeInfoBlock.VESAVersion & 0xF,
-        get_str(VbeInfoBlock.OEMStringPtr));
-    printf("Available 256 color video modes:\n");
-    for (p = VbeInfoBlock.VideoModePtr; *p !=(unsigned)-1; p++)
-    {
-        if (getModeInfo(*p))
-        {
-            printf("0x%04X : %4d by %4d (%dbpp)\n",
-                *p, ModeInfoBlock.XResolution, ModeInfoBlock.YResolution,
-                ModeInfoBlock.BitsPerPixel);
-        }
-    }
-    exit(1);
-}
-/* Initialize the specified video mode. Notice how we determine a shift factor
- * for adjusting the Window granularity for bank switching. This is much faster
- * than doing it with a multiply (especially with direct banking enabled). */
- 
-void initGraphics(uint mode) //(unsigned int x, unsigned int y)
-{
-    unsigned far    *p;
-    if (!getVbeInfo())
-    {
-        printf("No VESA VBE detected\n");
-        exit(1);
-    }
-    for (p = VbeInfoBlock.VideoModePtr; *p != (unsigned)-1; p++)
-    {
-        //if (getModeInfo(*p) && ModeInfoBlock.XResolution == x && ModeInfoBlock.YResolution == y)
-        if (getModeInfo(*p) && *p == mode)
-        {
-           //xres = x;   yres = y;
-           screen_w = ModeInfoBlock.XResolution; 
-           screen_h = ModeInfoBlock.YResolution;
-           bytesperline = ModeInfoBlock.BytesPerScanLine;
-           bankShift = 0;
-           while ((unsigned)(64 >> bankShift) != ModeInfoBlock.WinGranularity)
-               bankShift++;
-           bankSwitch = ModeInfoBlock.WinFuncPtr;
-           curBank = -1;
-           screenPtr = (char far *)( ((long)0xA000)<<16 | 0);
-           oldMode = getVBEMode();
-           setVBEMode(*p);
-           return;
-        }
-    }
-    printf("Valid video mode not found\n");
-    exit(1);
-}
 
 #include "sreset.arr"
 
@@ -1212,13 +897,13 @@ void boot_mandel(void)
 {   int fxp, only_2k, nnodes;
 
     rst_adpt(TRUE);
-    if (verbose) printf("Resetting Transputers...");
+    if (verbose) printf("Resetting Transputers");
     if (!load_buf(sreset,sizeof(sreset))) exit(1);
-    if (verbose) printf("Booting...");
+    if (verbose) printf(", Booting");
     if (!load_buf(flboot,sizeof(flboot))) exit(1);
-    if (verbose) printf("Loading...");      
+    if (verbose) printf(", Loading");      
     if (!load_buf(flload,sizeof(flload))) exit(1);
-    if (verbose) printf("ID'ing...\n");
+    if (verbose) printf(", ID'ing...\n");
     if (!load_buf(ident,sizeof(ident))) exit(1);
     if (!tbyte_out(0))
    {

@@ -6,16 +6,16 @@
 # + corrected tlink libs-order to circumvent float error
 # + added make rule for screen2.obj
 #
-# 2009
+# 2016
 # + switched to Borland C++ 3.1
-# + added VESA graphics output for more colors 
+# + added BGI graphics output for more colors and higher resolutions
 #
-# Caveat: Keep your path to the Borland tools short, else you'll
-#         reach the 128 chars-per-commandline limit quick!
+# Caveats: Keep your path to the Borland tools short, else you'll
+#          reach the 128 chars-per-commandline limit quick!
 #
-#         To execute this make-file you'll need the 1989 version
-#         of the LSC compiler and use the supplied 'lscmake.exe'
-#         (from the 1993 version) for this.
+#          To execute this make-file you'll need the 1989 version
+#          of the LSC compiler and use the supplied 'lscmake.exe'
+#          (from the 1993 version) for this.
 
 # MACRO DEFINITIONS:
 
@@ -61,7 +61,7 @@ man:  man.exe
 #try:  hostry.exe
 
 man.exe:  man.obj screen2.obj lkio.obj
-  $(BCBIN)\tlink -v  $(BCLIB)\c0s man screen2 lkio,man.exe,,tchrts $(BCLIB)\emu $(BCLIB)\maths $(BCLIB)\cs
+  $(BCBIN)\tlink /L$(BCLIB) -v  $(BCLIB)\c0s man screen2 lkio,man.exe,,tchrts emu maths cs graphics
 
   del *.bin
   del *.arr
