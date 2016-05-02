@@ -19,7 +19,6 @@ This Version was pushed to the 3.0 level, as the graphics output was *heavily* a
 * VGA 640x480/16 is now standard
 * The /v switch enables VESA VBE graphics. '/vshow' displays all available 8bit (256 color) modes, default is 640x480/256
 
-
 Beyond this, there are still all other mods from 2.x, like
 * a high-precision timer, mainly used for benchmarking
 * /x for verbose Transputer-comms output (for debugging)
