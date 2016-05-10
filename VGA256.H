@@ -1,8 +1,12 @@
 /*
 
 	The VESA VBE routines for 256 colors at higher resolutions
+	Part of CSA Mandelbrot "V3" packagage
+	Axel Muhr, 2016, www.geekdot.com
 
 */
+
+#include <math.h>
 
 /*---------------------- VESA Macro and type definitions -----------------------*/
 /* SuperVGA information block */
@@ -206,7 +210,8 @@ void setPalette332(void)
     unsigned int r, g, b, c;
     vgaColor p[256];
 
-    c = 0;
+
+     c = 0;
     for (r = 0; r <= 64; r += 9)
     {
         for (g = 0; g <= 64; g += 13)
@@ -223,7 +228,7 @@ void setPalette332(void)
     
 		p[255].red = 63;
 		p[255].green = 63;
-		p[255].blue = 63;
+		p[255].blue = 63; 
 		
     vgaSetPalette(0, 256, p);
 }

@@ -6,7 +6,7 @@
 # + corrected tlink libs-order to circumvent float error
 # + added make rule for screen2.obj
 #
-# 2009
+# 2016
 # + switched to Borland C++ 3.1
 # + added VESA graphics output for more colors 
 #
@@ -61,7 +61,7 @@ man:  man.exe
 #try:  hostry.exe
 
 man.exe:  man.obj screen2.obj lkio.obj
-  $(BCBIN)\tlink -v  $(BCLIB)\c0s man screen2 lkio,man.exe,,tchrts $(BCLIB)\emu $(BCLIB)\maths $(BCLIB)\cs
+  $(BCBIN)\tlink /L$(BCLIB) -v  $(BCLIB)\c0s man screen2 lkio,man.exe,,emu maths cs
 
   del *.bin
   del *.arr

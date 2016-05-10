@@ -27,7 +27,7 @@ But still there are many things to do:
 - [x] Better graphics support (higher resoluton, more colors)
 - [x] Rubberband function in VBE not working
 - [ ] Better Transputer detection (crashed if T2xx or C004 are found)
-- [ ] Better Timer-Lib. This current is an eval version, manufacturer vanished, can't remove nag-screen.
+- [x] Replce Timer-Lib. This current is an eval version, manufacturer vanished, can't remove nag-screen.
 - [ ] Enhance link adaptor support (currently B004 interface only)
 - [ ] Mouse control?
 - [ ] ...

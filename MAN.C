@@ -1,4 +1,5 @@
 /********************************* MAN.C ************************************
+*  Original source:                                                         *
 *  (C) Copyright 1987-1993  Computer System Architects, Provo UT.           *
 *  This Mandelbrot program is the property of Computer System Architects    *
 *  (CSA) and is provided only as an example of a transputer/PC program for  *
@@ -17,7 +18,7 @@
 ****************************************************************************/
 
 /*****************************************************************************
-Multiple changes made 2009-2016 by Axel Muhr (www.geekdot.com)
+Multiple changes/aditions made 2009-2016 by Axel Muhr (www.geekdot.com)
 
 	+ added a high-precision timer for benchmarking using the /a switch
 	+ added '/x' switch for debugging output
@@ -30,6 +31,8 @@ as the graphics output was heavily altered:
     * VGA 640x480/16 is now standard
     * The /v switch enables VESA VBE graphics. '/vshow' displays all 
       available 8bit (256 color) modes, default is 640x480/256
+      
+Check https://github.com/axelmuhr/T-Mandel/tree/Mandel_3 for updates     
 
 *****************************************************************************/
 
@@ -41,9 +44,9 @@ as the graphics output was heavily altered:
 #include <stdlib.h>
 #include <string.h>
 #include "lkio.h"
-#include "pchrt.h"	// High precision timer stuff
-#include "getopt.h"	// A cleaner way for commandline options
-#include "vga256.h"	// The VESA 256 routines
+#include "tim_int8.h"	// Timer
+#include "getopt.h"		// A cleaner way for commandline options
+#include "vga256.h"		// The VESA 256 routines
 
 
 #define TRUE  1
@@ -88,6 +91,7 @@ as the graphics output was heavily altered:
 
 #define AUTOFILE "man.dat"
 #define PAUSE    3
+#define TIMERS   5
 
 #define HIR  2.5
 #define LOR  3.0e-14
@@ -124,6 +128,11 @@ extern getch(void);
 extern kbhit(void);
 extern time(long *);
 
+// Timers
+unsigned long int tick_1, tick_2;
+unsigned long int elapsedtime[TIMERS];
+char timername[TIMERS][32];
+const char *ordinals[] = {"", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"}; 
 
 // VGA functions (16 colors)
 void draw_box(int,int,int,int);
@@ -168,14 +177,14 @@ main(argc,argv)
 int argc;
 char *argv[];
 {
-    int i;
+    int i, n;
     int vhex;
     char *s;
     
     char c = NULL;
 
-    printf("\nCSA Mandelzoom Version 3.0 for PC\n");
-    printf("(C) Copyright 1988 Computer System Architects Provo, Utah\n");
+    printf("\nCSA Mandelzoom Version 3.1 for PC\n");
+    printf("Based on (c)1988 Computer System Architects Provo, Utah\n");
     printf("Enhanced by Axel Muhr \(geekdot.com\), 2009-2016\n");
     printf("This is a free software and you are welcome to redistribute it\n\n");
 
@@ -185,12 +194,10 @@ char *argv[];
 			 autz = 1;
 		   /* ps = atoi(optarg);
 		   if ((ps < 0) || (ps > 9)) ps = PAUSE; */
-			 t_request(5);               /* ask for 5 timers */
-       if (t_start() != TRUE)      /* init TCHRT first thing */
-       {
-        printf("Insufficient heap for timers.\n");
-        exit(0);
-       }
+			 
+			 // Init timer
+       init8h(1000);
+			 ticks_8h = 0;
 		 
 		   break;
 			
@@ -245,10 +252,13 @@ char *argv[];
  }
    
    if (!host) {
-    init_lkio(lb,dc,dc);
-    t_entry(0);         /* we use timer 0 for T-Booting bench */
-    boot_mandel();
-    t_exit(0);
+    init_lkio(lb,dc,dc);   
+		tick_1 = ticks_8h;
+		 boot_mandel();
+		tick_2 = ticks_8h;
+		elapsedtime[0] = time8h(tick_1, tick_2); /* we use timer 0 for T-Booting bench */
+		strcpy(timername[0], "Booting Transputer(s)");
+    
     scan = scan_tran;
    }
    
@@ -303,15 +313,15 @@ char *argv[];
     if (autz) {
 	   fclose(fpauto);
    
-       t_set_report(NONZERO);                      /* specify report type */
-       t_rname("Benchmark results");               /* report title        */
-       t_name(0,"Booting Transputer(s)");          /* give each timer a name */
-       t_name(1,"1st run");
-       t_name(2,"2nd run");
-       t_name(3,"3rd run");
-       t_name(4,"4th run");
-       t_report(0);              /* do report - (0) goes to CRT */
-       t_stop();                 /* shut down TCHRT and free heap */
+       printf("\n\t\t\t\tBenchmark results\n\n");
+       printf("\tTimer\tName\t\t\t\tTime(secs)\n");
+       printf("\t-----\t----\t\t\t\t----------\n");
+       for(n = 0; n < (sizeof(elapsedtime) / sizeof(elapsedtime[0])); n++) // check for array entries
+       { 
+        if (elapsedtime[n] > 0)
+        	printf("\t%i\t%s\t\t%.4f\n", n, timername[n], (float)(elapsedtime[n]/1000.0));
+       }       
+       quit8h();
   }
   return(0);
 }
@@ -369,9 +379,11 @@ void auto_loop(void)
 	   if (res == EOF) {rewind(fpauto); continue;}
 	   if (res != 4) return;   /* End if anything else returned */
 	   scale_fac = rng/(esw-1);
-	   t_entry(run);           /* start timer */
+	   tick_1 = ticks_8h;
 	   (*scan)();              /* this does the work */
-	   t_exit(run);            /* stop timer */
+	   tick_2 = ticks_8h;
+	   elapsedtime[run] = time8h(tick_1, tick_2); // Add time to array
+	   sprintf(timername[run],"%s mandelbrot run", ordinals[run]); // Add timer name e.g. '1st mandelbrot run'
 	   run++;
 	   if (kbhit()) break;
 	   waitsec(ps);
