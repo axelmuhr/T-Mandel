@@ -9,7 +9,8 @@ Prerequisites
 * At least one Transputer (does not make sense without one)
 * A x86 PC running [MS|Free|Open|PC]DOS - yes, it's DOS only
 * Borland C-compiler (I use BC++ 3.1)
-* LSC Transputer cross C-Compiler (use this [link to download](http://www.classiccmp.org/transputer/software/languages/ansic/lsc/lsc-V89.1.tar.gz)
+* LSC Transputer cross C-Compiler (use this [link to download](http://www.classiccmp.org/transputer/software/languages/ansic/lsc/lsc-V89.1.tar.gz))
+* ...or get my 'Transputer SDK' VirtualBox image from [my page](https://www.geekdot.com/transputer-2/).
 
 Enhancements
 ------------
